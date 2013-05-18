@@ -1,0 +1,4 @@
+1.  basic peg parsing
+2.  direct and indirect left recursion
+3.  pattern match non string objects
+4.  parameterized rules (including higher order rules)
