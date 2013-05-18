@@ -9,9 +9,9 @@ end
 -- bleh, let's go ad hoc and say \\ => \ and \' => '
 -- also, i hate everything this function represents 
 -- except the ability to get something working faster 
--- than a saner way (will be thinking if i can figure 
--- a way to squeeze it into some combination of
--- ana/cata morphisms while watching movie this afternoon)
+-- than a saner way (guess no movie this afternoon after all
+-- ... making this not suck really isn't a priority because
+-- i can always just replace it with the finished parser)
 local function separateRules( rules )
     local rs = {} -- danger explicit accumulator in for loop
     local r = {}  -- danger list that gets stored and replaced in some loop iterations
@@ -26,17 +26,20 @@ local function separateRules( rules )
         local c = rules:sub( i, i )
         -- escape next character
         if c == [[\]] then 
+            print( c )
             escape = true 
             goto continue -- oh good, the set a variable and continue pattern never causes disasters
         end
        
         -- try to escape
-        if escape and ( c == "'"  or c == [[\]] ) then
-            r[#r+1] = c
-            escape = false
-            goto continue
-        else
-            error "bad escape sequence"
+        if escape then 
+            if c == "'"  or c == [[\]] then
+                r[#r+1] = c
+                escape = false
+                goto continue
+            else
+                error "bad escape sequence"
+            end
         end
 
         -- activate quote mode
@@ -69,16 +72,54 @@ local function separateRules( rules )
         rs[#rs+1] = r
     end
 
-    return rs
+    local ret = {}
+    for _, v in ipairs( rs ) do
+        ret[#ret+1] = table.concat( v ) 
+    end
+
+    return ret
+end
+
+local function parseRuleDefQuote( a, def, i )
+    return parseRuleDefKillWhiteSpace( a, def, i )
+end
+
+local function parseRuleDefKillWhiteSpace( a, def, i )
+    local n = i + 1
+    local c = def:sub( n, n )
+    if c:match "%s"  or c == "\n" or c == "\r" then
+        return parseRuleDefKillWhiteSpace( a, def, n )
+    elseif c == "'" then
+        return nil
+    end
+end
+
+
+local function parseRuleDefStart( def )
+     
+end
+
+local function parseRule( rule )
+    local lhs, rhs = rule:match( "^.-(%w+).-=(.-)$" )  
+    local ruleList = {}
+    for m in rhs:gmatch( "(%g)*" ) do
+        ruleList[#ruleList+1] = m
+    end
+    return lhs, ruleList 
 end
 
 function parse( str )
-    local name, rules = str:match( "^%s-meta%s-(%w+).-{(.-)}%s*$" )
+    local name, rules = str:match( "^%s-meta%s-(%w+).-{(.-)}.*$" )
     if name == nil or rules == nil then
         return false, "failure matching name and rules"
     end
     local srules = separateRules( rules )
-    return name, rules, srules
+    local prules = {}
+    for _, r in ipairs( srules ) do
+        local n, rs = parseRule( r )
+        prules[#prules+1] = { n = n, rules = rs } 
+    end
+    return name, prules 
 end
 
 
