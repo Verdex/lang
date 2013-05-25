@@ -29,7 +29,12 @@ typedef enum {
      
 typedef struct {
     opcode_t opcode;
-    // TODO location? 
+
+    // dest needs to be a register or a register dereferenced with offset of possibly zero
+    // source can then be a register, a register dereferenced (with offset of possily zero),
+    // dereference means two things, pull from address or put too address
+
+
     /*  TODO 
 
         structure of my executable will influence the structure of my opcode
@@ -54,9 +59,9 @@ typedef struct {
     uint8_t* sp; 
     uint8_t* bp;
     // TODO decide if these are actually going to be useful
-    uint32_t g1;
-    uint32_t g2;
-    uint32_t g3;
+    uint64_t ret;
+    uint64_t accum;
+    uint8_t* regs;
 
     // TODO:  throw a GC interface in here eventually
 } vm_t;
@@ -78,14 +83,13 @@ void vm_run( vm_t* vm ) {
             case op_add_u8:
                 printf( "here\n" );
                 vm->ip++;
-                
+                 
                 break;
             case op_exit:
             default: 
                 goto impossible;
         }
 
-         
     }
 
 impossible:
