@@ -87,7 +87,7 @@ typedef struct {
 // any pointers that point to it.  Try not to do that without
 // thinking it through first.
 
-static void* get( vm_t* vm, param_t* p ) {
+static void* get( vm_t* vm, param_t* p ) { // TODO need more than one get function
     switch ( p->type ) {
         case loc_stack:
         case loc_glob:
