@@ -14,13 +14,13 @@ typedef enum {
 
     op_lea, // TODO i think i can get away with single lea, check to make sure this is true
     op_jmp,
+    // TODO need callopcode
 
     op_exit
 } opcode_t;
     
 typedef enum {
     loc_addr,
-    loc_ip,
     loc_sp,
     loc_bp,
     loc_ret,

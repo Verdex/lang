@@ -14,8 +14,6 @@ static void* get_deref( vm_t* vm, param_t* p ) {
     switch ( p->type ) {
         case loc_addr:
             return p->addr; // TODO implement, test
-        case loc_ip:
-            return vm->ip;  // TODO implement, test
         case loc_sp:
             return vm->sp;  // TODO implement, test
         case loc_bp:
@@ -36,8 +34,6 @@ static void* get_direct( vm_t* vm, param_t* p ) {
     switch ( p->type ) {
         case loc_addr:
             return p->addr; // TODO test
-        case loc_ip:
-            return vm->ip; // TODO test
         case loc_sp:
             return vm->sp; // TODO test
         case loc_bp:
@@ -67,9 +63,6 @@ static void store_deref( vm_t* vm, param_t* p, void* value, size_t size ) {
         case loc_addr:
             // TODO implement, test
             break;
-        case loc_ip:
-              // TODO implement, test
-            break;
         case loc_sp:
              // TODO implement, test
             break;
@@ -95,14 +88,14 @@ static void store_direct( vm_t* vm, param_t* p, void* value, size_t size ) {
         case loc_addr:
              // TODO implement,test
             break;
-        case loc_ip:
-             // TODO implement,test
-            break;
         case loc_sp:
              // TODO implement,test
             break;
         case loc_bp:
             // TODO implement,test
+            if ( size > sizeof( uint8_t* ) )
+                goto error;
+            memcpy( vm->bp, value, size );
             break;
         case loc_ret:
             if ( size > sizeof( uint64_t ) )
