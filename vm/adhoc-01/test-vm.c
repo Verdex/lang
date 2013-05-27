@@ -33,10 +33,25 @@ static void accumGetAndStoreWorks() {
     assert( vm.accum == 4 );
 }
 
+static void retGetAndStoreWorks() {
+    vm_t vm;
+    instr_t code[] = { 
+        { op_add_u32, { loc_ret, false, 0, NULL }, { loc_ret, false, 0, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+    vm.ret = 3;
+    vm_run( &vm );
+    assert( vm.ret == 6 );
+}
+
+
 int main() {
     
     genGetAndStoreWorks();
     accumGetAndStoreWorks();
+    retGetAndStoreWorks();
 
     return 0;
 }

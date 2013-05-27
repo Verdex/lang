@@ -43,7 +43,7 @@ static void* get_direct( vm_t* vm, param_t* p ) {
         case loc_bp:
             return vm->bp; // TODO test
         case loc_ret:
-            return &vm->ret; // TODO test
+            return &vm->ret; 
         case loc_accum:
             return &vm->accum; 
         case loc_gen:
@@ -105,7 +105,6 @@ static void store_direct( vm_t* vm, param_t* p, void* value, size_t size ) {
             // TODO implement,test
             break;
         case loc_ret:
-             // TODO test
             if ( size > sizeof( uint64_t ) )
                 goto error;
             memcpy( &vm->ret, value, size );
