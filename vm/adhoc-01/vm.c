@@ -19,7 +19,7 @@ typedef enum {
     // TODO mov
     // TODO how should push/pop be structed?
 
-    op_lea, // TODO i think i can get away with single lea, check
+    op_lea, // TODO i think i can get away with single lea, check to make sure this is true
     op_jmp,
 
     op_exit
