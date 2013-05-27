@@ -173,22 +173,22 @@ static void store_direct( vm_t* vm, param_t* p ) {
              // TODO implement,test
             break;
         case loc_ip:
-            return vm->ip; // TODO implement,test
+             // TODO implement,test
             break;
         case loc_sp:
-            return vm->sp; // TODO implement,test
+             // TODO implement,test
             break;
         case loc_bp:
-            return vm->bp; // TODO implement,test
+            // TODO implement,test
             break;
         case loc_ret:
-            return &vm->ret; // TODO implement,test
+             // TODO implement,test
             break;
         case loc_accum:
-            return &vm->accum; // TODO implement,test
+            // TODO implement,test
             break;
         case loc_gen:
-            return &vm->gen;  // TODO implement,test
+             // TODO implement,test
             break;
         case loc_null:
             break;
