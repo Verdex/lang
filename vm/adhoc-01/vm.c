@@ -1,11 +1,13 @@
 
-#include<stdlib.h>
-#include<stdint.h>
 #include<stdbool.h>
+#include<stdint.h>
+#include<string.h>
+#include<stdlib.h>
 
 #ifdef TEST
 
 #include<stdio.h>
+#include<assert.h>
 
 #endif
 
@@ -139,7 +141,7 @@ static void* get( vm_t* vm, param_t* p ) {
     }
 }
 
-static void store_deref( vm_t* vm, param_t* p ) { 
+static void store_deref( vm_t* vm, param_t* p, void* value, size_t size ) { 
     switch ( p->type ) {
         case loc_addr:
             // TODO implement, test
@@ -167,7 +169,7 @@ static void store_deref( vm_t* vm, param_t* p ) {
     }
 }
 
-static void store_direct( vm_t* vm, param_t* p ) { 
+static void store_direct( vm_t* vm, param_t* p, void* value, size_t size ) { 
     switch ( p->type ) {
         case loc_addr:
              // TODO implement,test
@@ -188,18 +190,18 @@ static void store_direct( vm_t* vm, param_t* p ) {
             // TODO implement,test
             break;
         case loc_gen:
-             // TODO implement,test
+            memcpy( &vm->gen, value, size );
             break;
         case loc_null:
             break;
     }
 }
 
-static void store( vm_t* vm, param_t* p ) {
+static void store( vm_t* vm, param_t* p, void* value, size_t size ) {
     if ( p->deref ) {
-        store_deref( vm, p );
+        store_deref( vm, p, value, size );
     } else {
-        store_direct( vm, p );
+        store_direct( vm, p, value, size );
     }
 }
 
@@ -216,6 +218,8 @@ void vm_run( vm_t* vm ) {
                 { 
                     uint32_t* v1 = get( vm, &c.dest );
                     uint32_t* v2 = get( vm,  &c.src );
+                    uint32_t res = *v1 + *v2;
+                    store( vm, &c.dest, &res, 4 );
 
                     vm->ip++;
                 }                 
@@ -254,30 +258,19 @@ static void genAccessWorks() {
     vm_t vm;
     instr_t code[] = { 
         { op_add_u32, { loc_gen, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
-        { op_add_u32, { loc_accum, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
         { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
     };
     vm.code = code;
     vm.ip = vm.code;
     vm.gen = 1;
-    vm.accum = 2;
     vm_run( &vm );
+    assert( vm.gen == 2 );
 }
 
 int main() {
+    
+    genAccessWorks();
 
-
-    vm_t vm;
-    instr_t code[] = { 
-        { op_add_u32, { loc_gen, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
-        { op_add_u32, { loc_accum, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
-        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
-    };
-    vm.code = code;
-    vm.ip = vm.code;
-    vm.gen = 1;
-    vm.accum = 2;
-    vm_run( &vm );
     return 0;
 }
 
