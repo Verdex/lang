@@ -46,20 +46,22 @@ static void retGetAndStoreWorks() {
     assert( vm.ret == 6 );
 }
 
-// Note:  bp probably shouldn't be used for adding, but it will need to 
-// have an address directly fetched and stored, so I want to make sure this
-// sort of thing will work.
-static void bpGetAndStoreWorks() { 
+static void bpStoreWorks() { 
     vm_t vm;
     instr_t code[] = { 
-        { op_add_u32, { loc_ret, false, 0, NULL }, { loc_ret, false, 0, NULL } }, 
+        { op_mov_32, { loc_bp, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
         { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
     };
     vm.code = code;
     vm.ip = vm.code;
-    vm.ret = 3;
+
+    int i = 0;
+    vm.gen = (uint64_t)&i;
+    printf( "here\n" );
+    printf( "%x\n", &i); 
     vm_run( &vm );
-    assert( vm.ret == 6 );
+    printf( "here\n" );
+    assert( vm.bp == (uint8_t*)&i );
 }
 
 // TODO test that bp, and sp addresses moved into them etc ... 
@@ -70,6 +72,7 @@ int main() {
     genGetAndStoreWorks();
     accumGetAndStoreWorks();
     retGetAndStoreWorks();
+    bpStoreWorks();
 
     return 0;
 }

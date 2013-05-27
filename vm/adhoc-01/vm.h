@@ -9,7 +9,9 @@ typedef enum {
     op_add_u32,
     op_add_s32,
     // TODO add other basic ops
-    // TODO mov
+    op_sub_u32,
+    op_sub_s32,
+    op_mov_32,
     // TODO how should push/pop be structed?
 
     op_lea, // TODO i think i can get away with single lea, check to make sure this is true

@@ -1,4 +1,8 @@
 
+#include<stdio.h> // TODO remove
+// TODO remove
+#define LOG( args... ) fprintf( stderr, args )
+
 #include<stdbool.h>
 #include<stdint.h>
 #include<string.h>
@@ -134,18 +138,29 @@ void vm_run( vm_t* vm ) {
     // input invalid)
 
     while ( vm->ip->opcode != op_exit ) {
-        instr_t c = *vm->ip;
-        switch ( c.opcode ) {
+        instr_t* c = vm->ip;
+        switch ( c->opcode ) {
 
             case op_add_u32:
                 { 
-                    uint32_t* v1 = get( vm, &c.dest );
-                    uint32_t* v2 = get( vm,  &c.src );
+                    uint32_t* v1 = get( vm, &c->dest );
+                    uint32_t* v2 = get( vm,  &c->src );
                     uint32_t res = *v1 + *v2;
-                    store( vm, &c.dest, &res, sizeof( uint32_t ) );
+                    store( vm, &c->dest, &res, sizeof( uint32_t ) );
 
                     vm->ip++;
                 }                 
+                break;
+            case op_mov_32:
+                {
+                    LOG( "before moves\n" );
+                    uint32_t* s = get( vm, &c->src );
+                    LOG( "%x\n", *s ); 
+                    LOG( "after get\n" );
+                    store( vm, &c->dest, s, sizeof( uint8_t* ) );
+                    LOG( "after store\n" );
+
+                }
                 break;
             case op_exit:
             default: 
@@ -168,6 +183,12 @@ bool vm_init( vm_t* vm ) {
 
     // TODO initialization for other VM objects
 
+
+    // TODO the assembler can only set the offsets of where
+    // global objects can exist (variables, functions, etc)
+    // once that file is read into the vm, something will need
+    // to setup the true addresses (maybe this function)
+    
     return true;
 
 error:
