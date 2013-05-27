@@ -24,8 +24,7 @@ typedef enum {
 } opcode_t;
     
 typedef enum {
-    loc_stack,
-    loc_glob,
+    loc_addr,
     loc_ip,
     loc_sp,
     loc_bp,
@@ -39,6 +38,7 @@ typedef struct {
     loc_t type;
     bool deref;
     uint64_t offset;
+    uint8_t* addr;
 } param_t;
 
 typedef struct {
@@ -87,27 +87,120 @@ typedef struct {
 // any pointers that point to it.  Try not to do that without
 // thinking it through first.
 
-static void* get( vm_t* vm, param_t* p ) { // TODO need more than one get function
+static void* get_deref( vm_t* vm, param_t* p ) { 
     switch ( p->type ) {
-        case loc_stack:
-        case loc_glob:
-            return vm->global; // TODO this isnt right ... stack will need similar treatment
+        case loc_addr:
+            return p->addr; // TODO implement, test
         case loc_ip:
-            return vm->ip;
+            return vm->ip;  // TODO implement, test
         case loc_sp:
-            return vm->sp;
+            return vm->sp;  // TODO implement, test
         case loc_bp:
-            return vm->bp;
+            return vm->bp;  // TODO implement, test
         case loc_ret:
-            return &vm->ret;
+            return &vm->ret;  // TODO implement, test
         case loc_accum:
-            return &vm->accum;
+            return &vm->accum;  // TODO implement, test
+        case loc_gen:
+            return &vm->gen; // TODO implement, test
+        case loc_null:
+            return NULL;
+    }
+    return NULL;
+}
+
+static void* get_direct( vm_t* vm, param_t* p ) { 
+    switch ( p->type ) {
+        case loc_addr:
+            return p->addr; // TODO test
+        case loc_ip:
+            return vm->ip; // TODO test
+        case loc_sp:
+            return vm->sp; // TODO test
+        case loc_bp:
+            return vm->bp; // TODO test
+        case loc_ret:
+            return &vm->ret; // TODO test
+        case loc_accum:
+            return &vm->accum; // TODO test
         case loc_gen:
             return &vm->gen;
         case loc_null:
             return NULL;
     }
     return NULL;
+}
+
+static void* get( vm_t* vm, param_t* p ) {
+    if ( p->deref ) {
+        return get_deref( vm, p );
+    } else {
+        return get_direct( vm, p );
+    }
+}
+
+static void store_deref( vm_t* vm, param_t* p ) { 
+    switch ( p->type ) {
+        case loc_addr:
+            // TODO implement, test
+            break;
+        case loc_ip:
+              // TODO implement, test
+            break;
+        case loc_sp:
+             // TODO implement, test
+            break;
+        case loc_bp:
+              // TODO implement, test
+            break;
+        case loc_ret:
+              // TODO implement, test
+            break;
+        case loc_accum:
+              // TODO implement, test
+            break;
+        case loc_gen:
+            // TODO implement, test
+            break;
+        case loc_null:
+            break;
+    }
+}
+
+static void store_direct( vm_t* vm, param_t* p ) { 
+    switch ( p->type ) {
+        case loc_addr:
+             // TODO implement,test
+            break;
+        case loc_ip:
+            return vm->ip; // TODO implement,test
+            break;
+        case loc_sp:
+            return vm->sp; // TODO implement,test
+            break;
+        case loc_bp:
+            return vm->bp; // TODO implement,test
+            break;
+        case loc_ret:
+            return &vm->ret; // TODO implement,test
+            break;
+        case loc_accum:
+            return &vm->accum; // TODO implement,test
+            break;
+        case loc_gen:
+            return &vm->gen;  // TODO implement,test
+            break;
+        case loc_null:
+            break;
+    }
+}
+
+static void store( vm_t* vm, param_t* p ) {
+    if ( p->deref ) {
+        store_deref( vm, p );
+    } else {
+        store_direct( vm, p );
+    }
 }
 
 void vm_run( vm_t* vm ) {
@@ -123,7 +216,7 @@ void vm_run( vm_t* vm ) {
                 { 
                     uint32_t* v1 = get( vm, &c.dest );
                     uint32_t* v2 = get( vm,  &c.src );
-                    printf( "%d\n", *v1 + *v2 );
+
                     vm->ip++;
                 }                 
                 break;
@@ -157,17 +250,33 @@ error:
 
 #ifdef TEST 
 
-int main() {
-
+static void genAccessWorks() {
     vm_t vm;
     instr_t code[] = { 
-        { op_add_u32, { loc_gen, false, 0 }, { loc_gen, false, 0 } }, 
-        { op_add_u32, { loc_gen, false, 0 }, { loc_gen, false, 0 } }, 
-        { op_exit, { loc_null, false, 0 }, { loc_null, false, 0 } } 
+        { op_add_u32, { loc_gen, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
+        { op_add_u32, { loc_accum, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
     };
     vm.code = code;
     vm.ip = vm.code;
     vm.gen = 1;
+    vm.accum = 2;
+    vm_run( &vm );
+}
+
+int main() {
+
+
+    vm_t vm;
+    instr_t code[] = { 
+        { op_add_u32, { loc_gen, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
+        { op_add_u32, { loc_accum, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+    vm.gen = 1;
+    vm.accum = 2;
     vm_run( &vm );
     return 0;
 }
