@@ -72,11 +72,9 @@ typedef struct {
     uint8_t* stack;
     uint8_t* global;
     instr_t* code; 
-    // TODO code length? .. maybe end program op code?
     instr_t* ip; 
     uint8_t* sp; 
     uint8_t* bp;
-    // TODO decide if these are actually going to be useful
     uint64_t ret;
     uint64_t accum;
     uint64_t gen;
