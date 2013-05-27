@@ -1,0 +1,12 @@
+I should never have to move something out of an IP ... as long as i have a special
+return here op code (like call) ... call can move the next ip position in the current
+function to the return address location in the stack frame and for tail optimized stuff
+i can just do a jump instead of a call
+
+all functions are statically compiled (and even eval stuff will have a static address
+after it's done being compiled).  Which means all of the addresses for places you
+would like to set the ip to already exist (you never have to pull something out of IP
+... unless you don't have a call op code)
+
+so call is necessary and jump is necessary and then you dont have to worry
+about general store/fetch code for ip
