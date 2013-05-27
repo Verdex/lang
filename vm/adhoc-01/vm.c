@@ -219,7 +219,7 @@ void vm_run( vm_t* vm ) {
                     uint32_t* v1 = get( vm, &c.dest );
                     uint32_t* v2 = get( vm,  &c.src );
                     uint32_t res = *v1 + *v2;
-                    store( vm, &c.dest, &res, 4 );
+                    store( vm, &c.dest, &res, sizeof( uint32_t ) );
 
                     vm->ip++;
                 }                 
@@ -254,7 +254,7 @@ error:
 
 #ifdef TEST 
 
-static void genAccessWorks() {
+static void genAccessAndStoreWorks() {
     vm_t vm;
     instr_t code[] = { 
         { op_add_u32, { loc_gen, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
