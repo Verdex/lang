@@ -12,6 +12,7 @@ typedef enum {
     op_sub_u32,
     op_sub_s32,
     op_mov_32,
+    op_mov_64,
     // TODO how should push/pop be structed?
 
     op_lea, // TODO i think i can get away with single lea, check to make sure this is true
@@ -49,8 +50,8 @@ typedef struct {
     uint8_t* global;
     instr_t* code; 
     instr_t* ip; 
-    uint8_t* sp; 
-    uint8_t* bp;
+    void* sp; 
+    void* bp;
     uint64_t ret;
     uint64_t accum;
     uint64_t gen;

@@ -39,9 +39,9 @@ static void* get_direct( vm_t* vm, param_t* p ) {
         case loc_addr:
             return p->addr; // TODO test
         case loc_sp:
-            return vm->sp; // TODO test
+            return &vm->sp; 
         case loc_bp:
-            return vm->bp; // TODO test
+            return &vm->bp; 
         case loc_ret:
             return &vm->ret; 
         case loc_accum:
@@ -93,13 +93,14 @@ static void store_direct( vm_t* vm, param_t* p, void* value, size_t size ) {
              // TODO implement,test
             break;
         case loc_sp:
-             // TODO implement,test
+             if ( size != sizeof( uint8_t* ) )
+                goto error;
+            vm->sp = *((void**)value);
             break;
         case loc_bp:
-            // TODO implement,test
-            if ( size > sizeof( uint8_t* ) )
+            if ( size != sizeof( uint8_t* ) )
                 goto error;
-            memcpy( vm->bp, value, size );
+            vm->bp = *((void**)value);
             break;
         case loc_ret:
             if ( size > sizeof( uint64_t ) )
@@ -151,15 +152,12 @@ void vm_run( vm_t* vm ) {
                     vm->ip++;
                 }                 
                 break;
-            case op_mov_32:
+            case op_mov_64:
                 {
-                    LOG( "before moves\n" );
-                    uint32_t* s = get( vm, &c->src );
-                    LOG( "%x\n", *s ); 
-                    LOG( "after get\n" );
-                    store( vm, &c->dest, s, sizeof( uint8_t* ) );
-                    LOG( "after store\n" );
-
+                    void* s = get( vm, &c->src );
+                    store( vm, &c->dest, s, 8 );
+                    
+                    vm->ip++;
                 }
                 break;
             case op_exit:

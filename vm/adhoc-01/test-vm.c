@@ -49,7 +49,7 @@ static void retGetAndStoreWorks() {
 static void bpStoreWorks() { 
     vm_t vm;
     instr_t code[] = { 
-        { op_mov_32, { loc_bp, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
+        { op_mov_64, { loc_bp, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
         { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
     };
     vm.code = code;
@@ -57,11 +57,53 @@ static void bpStoreWorks() {
 
     int i = 0;
     vm.gen = (uint64_t)&i;
-    printf( "here\n" );
-    printf( "%x\n", &i); 
     vm_run( &vm );
-    printf( "here\n" );
-    assert( vm.bp == (uint8_t*)&i );
+    assert( vm.bp == &i );
+}
+
+static void spStoreWorks() { 
+    vm_t vm;
+    instr_t code[] = { 
+        { op_mov_64, { loc_sp, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+
+    int i = 0;
+    vm.gen = (uint64_t)&i;
+    vm_run( &vm );
+    assert( vm.sp == &i );
+}
+
+static void spGetWorks() { 
+    vm_t vm;
+    instr_t code[] = { 
+        { op_mov_64, { loc_bp, false, 0, NULL }, { loc_sp, false, 0, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+
+    int i = 0;
+    vm.sp = &i;
+    vm_run( &vm );
+    assert( vm.bp == &i );
+}
+
+static void bpGetWorks() {
+    vm_t vm;
+    instr_t code[] = { 
+        { op_mov_64, { loc_sp, false, 0, NULL }, { loc_bp, false, 0, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+
+    int i = 0;
+    vm.bp = &i;
+    vm_run( &vm );
+    assert( vm.sp == &i );
 }
 
 // TODO test that bp, and sp addresses moved into them etc ... 
@@ -73,6 +115,9 @@ int main() {
     accumGetAndStoreWorks();
     retGetAndStoreWorks();
     bpStoreWorks();
+    spStoreWorks();
+    spGetWorks();
+    bpGetWorks();
 
     return 0;
 }
