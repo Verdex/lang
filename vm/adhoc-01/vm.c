@@ -4,84 +4,7 @@
 #include<string.h>
 #include<stdlib.h>
 
-#ifdef TEST
-
-#include<stdio.h>
-#include<assert.h>
-
-#endif
-
-
-typedef enum {
-    op_add_u32,
-    op_add_s32,
-    // TODO add other basic ops
-    // TODO mov
-    // TODO how should push/pop be structed?
-
-    op_lea, // TODO i think i can get away with single lea, check to make sure this is true
-    op_jmp,
-
-    op_exit
-} opcode_t;
-    
-typedef enum {
-    loc_addr,
-    loc_ip,
-    loc_sp,
-    loc_bp,
-    loc_ret,
-    loc_accum,
-    loc_gen,
-    loc_null,
-} loc_t;
-
-typedef struct {
-    loc_t type;
-    bool deref;
-    uint64_t offset;
-    uint8_t* addr;
-} param_t;
-
-typedef struct {
-    opcode_t opcode;
-    param_t dest;
-    param_t src;
-
-    // dest needs to be a register or a register dereferenced with offset of possibly zero
-    // source can then be a register, a register dereferenced (with offset of possily zero),
-    // dereference means two things, pull from address or put too address
-
-
-    /*  TODO 
-
-        structure of my executable will influence the structure of my opcode
-
-        * is going to be necessary because there's no point to derefernce if you aren't using it
-        offset
-        label
-        jump label
-        jump *reg
-        .glob, etc
-        handling blah to reg vs blah to stack
-        handling blah from reg vs blah from stack
-    */
-} instr_t;
-
-typedef struct {
-    uint8_t* stack;
-    uint8_t* global;
-    instr_t* code; 
-    instr_t* ip; 
-    uint8_t* sp; 
-    uint8_t* bp;
-    uint64_t ret;
-    uint64_t accum;
-    uint64_t gen;
-
-    // TODO:  throw a GC interface in here eventually
-} vm_t;
-
+#include "vm.h"
 
 // TODO:  resizing a stack sounds like a great way to invalidate 
 // any pointers that point to it.  Try not to do that without
@@ -122,7 +45,7 @@ static void* get_direct( vm_t* vm, param_t* p ) {
         case loc_ret:
             return &vm->ret; // TODO test
         case loc_accum:
-            return &vm->accum; // TODO test
+            return &vm->accum; 
         case loc_gen:
             return &vm->gen;
         case loc_null:
@@ -182,17 +105,27 @@ static void store_direct( vm_t* vm, param_t* p, void* value, size_t size ) {
             // TODO implement,test
             break;
         case loc_ret:
-             // TODO implement,test
+             // TODO test
+            if ( size > sizeof( uint64_t ) )
+                goto error;
+            memcpy( &vm->ret, value, size );
             break;
         case loc_accum:
-            // TODO implement,test
+            if ( size > sizeof( uint64_t ) )
+                goto error;
+            memcpy( &vm->accum, value, size );
             break;
         case loc_gen:
+            if ( size > sizeof( uint64_t ) )
+                goto error;
             memcpy( &vm->gen, value, size );
             break;
         case loc_null:
             break;
     }
+
+error:
+    return; 
 }
 
 static void store( vm_t* vm, param_t* p, void* value, size_t size ) {
@@ -249,27 +182,16 @@ error:
     return false;
 }
 
-
-#ifdef TEST 
-
-static void genAccessAndStoreWorks() {
-    vm_t vm;
-    instr_t code[] = { 
-        { op_add_u32, { loc_gen, false, 0, NULL }, { loc_gen, false, 0, NULL } }, 
-        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
-    };
-    vm.code = code;
-    vm.ip = vm.code;
-    vm.gen = 1;
-    vm_run( &vm );
-    assert( vm.gen == 2 );
+void vm_destroy( vm_t* vm ) {
 }
 
-int main() {
-    
-    genAccessWorks();
+void vm_destroyAndNull( vm_t** vm ) { // TODO keep?
+    if ( vm == NULL ) 
+        goto error;
 
-    return 0;
+    vm_destroy( *vm );
+    *vm = NULL;
+
+error:
+    return;
 }
-
-#endif
