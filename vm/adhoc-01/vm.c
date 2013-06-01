@@ -37,7 +37,7 @@ static void* get_deref( vm_t* vm, param_t* p ) {
 static void* get_direct( vm_t* vm, param_t* p ) { 
     switch ( p->type ) {
         case loc_addr:
-            return &p->addr; // TODO test
+            return &p->addr; 
         case loc_sp:
             return &vm->sp; 
         case loc_bp:
@@ -90,8 +90,7 @@ static void store_deref( vm_t* vm, param_t* p, void* value, size_t size ) {
 static void store_direct( vm_t* vm, param_t* p, void* value, size_t size ) { 
     switch ( p->type ) {
         case loc_addr:
-             // TODO implement,test
-            break;
+            goto error;
         case loc_sp:
              if ( size != sizeof( void* ) )
                 goto error;

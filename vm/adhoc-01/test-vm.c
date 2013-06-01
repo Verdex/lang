@@ -106,6 +106,21 @@ static void bpGetWorks() {
     assert( vm.sp == &i );
 }
 
+static void addrGetWorks() {
+    int i = 0;
+
+    vm_t vm;
+    instr_t code[] = { 
+        { op_mov_64, { loc_gen, false, 0, NULL }, { loc_addr, false, 0, &i } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+
+    vm_run( &vm );
+    assert( (void*)vm.gen == &i );
+}
+
 // TODO test that bp, and sp addresses moved into them etc ... 
 // basically make sure function call pre/post operations work
 
@@ -118,6 +133,7 @@ int main() {
     spStoreWorks();
     spGetWorks();
     bpGetWorks();
+    addrGetWorks();
 
     return 0;
 }
