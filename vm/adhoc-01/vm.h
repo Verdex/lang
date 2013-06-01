@@ -36,7 +36,7 @@ typedef struct {
     loc_t type;
     bool deref;
     uint64_t offset;
-    uint8_t* addr;
+    void* addr;
 } param_t;
 
 typedef struct {
