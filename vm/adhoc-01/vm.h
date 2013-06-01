@@ -17,7 +17,7 @@ typedef enum {
 
     op_lea, // TODO i think i can get away with single lea, check to make sure this is true
     op_jmp,
-    // TODO need callopcode
+    // TODO need call opcode
 
     op_exit
 } opcode_t;
