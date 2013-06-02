@@ -26,11 +26,11 @@ static void* get_deref( vm_t* vm, param_t* p ) {
         case loc_bp:
             return vm->bp;  // TODO test
         case loc_ret:
-            return (void*)vm->ret;  // TODO test
+            return (void*)vm->ret + p->offset;  // TODO test
         case loc_accum:
-            return (void*)vm->accum;  // TODO test
+            return (void*)vm->accum + p->offset;  // TODO test
         case loc_gen:
-            return (void*)vm->gen; // TODO test
+            return (void*)vm->gen + p->offset; // TODO test
         case loc_null:
             return NULL;
     }

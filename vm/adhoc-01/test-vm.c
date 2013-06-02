@@ -121,6 +121,23 @@ static void addrGetWorks() {
     assert( (void*)vm.gen == &i );
 }
 
+static void genGetDerefWorks() {
+    vm_t vm;
+    instr_t code[] = { 
+        { op_mov_64, { loc_accum, false, 0, NULL }, { loc_gen, true, 0, NULL } }, 
+        { op_mov_64, { loc_ret, false, 0, NULL }, { loc_gen, true, 1, NULL } }, 
+        { op_exit, { loc_null, false, 0, NULL }, { loc_null, false, 0, NULL } } 
+    };
+    vm.code = code;
+    vm.ip = vm.code;
+
+    int i[2] = { 2, 1 };
+    vm.gen = (uint64_t)&i;
+    vm_run( &vm );
+    printf( "%u\n", vm.accum );
+    assert( vm.accum == 2 );
+    assert( vm.ret == 1 );
+}
 // TODO test that bp, and sp addresses moved into them etc ... 
 // basically make sure function call pre/post operations work
 
@@ -134,6 +151,7 @@ int main() {
     spGetWorks();
     bpGetWorks();
     addrGetWorks();
+    genGetDerefWorks();
 
     return 0;
 }
