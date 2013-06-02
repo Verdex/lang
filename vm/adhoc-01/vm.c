@@ -18,6 +18,8 @@ static void* get_deref( vm_t* vm, param_t* p ) {
     switch ( p->type ) {
         // TODO add offsets
         case loc_addr:
+            // TODO get deref on a loc_addr doesn't sound quite right
+            // might need to refactor this some
             return p->addr; // TODO test
         case loc_sp:
             return vm->sp;  // TODO test
