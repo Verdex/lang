@@ -14,13 +14,15 @@ simpleType =
         r <- many (alphaNum <|> oneOf ['`', '_']) 
         return (fl : r)
 
-ikky :: Parsec String () String
-ikky = 
-    do 
-        t1 <- simpleType
-        -- optional spaces
-        -- optional arrow
-        -- optional spaces
-        -- t2 <- simple type
-        -- recurse?
+spaceArrow :: Parsec String () ()
+spaceArrow =
+    do
+        optional spaces
+        string "->"
+        optional spaces
+        return ()
+
+jabber :: Parsec String () [String]
+jabber = sepBy1 simpleType spaceArrow
+
 
