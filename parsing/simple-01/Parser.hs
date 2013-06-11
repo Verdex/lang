@@ -40,7 +40,7 @@ parenType =
 funcType :: Parsec String () Func
 funcType = 
     do 
-        t1 <- simpleType
+        t1 <- typeParser 
         t2 <- tList
         case t2 of 
             Nothing -> return t1
@@ -54,5 +54,10 @@ tList =
         return t
 
 typeParser :: Parsec String () Func
-typeParser = parenType <|> funcType <|> simpleType
+typeParser = 
+    do
+        t <- funcType <|> parenType <|> simpleType
+        optional spaces
+        char ';'
+        return t
 
