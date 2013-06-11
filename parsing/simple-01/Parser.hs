@@ -40,21 +40,19 @@ parenType =
 funcType :: Parsec String () Func
 funcType = 
     do 
-        t1 <- simpleType 
-        t2 <- tList 
-        return (Arrow t1 t2)
+        t1 <- simpleType
+        t2 <- tList
+        case t2 of 
+            Nothing -> return t1
+            Just t -> return (Arrow t1 t )
 
-tList :: Parsec String () Func
-tList = optional jabber 
-
-jabber :: Parsec String () Func
-jabber = 
+tList :: Parsec String () (Maybe Func)
+tList = 
     do 
         spaceArrow
-        t <- typeParser
+        t <- optionMaybe typeParser
         return t
 
--- TODO loops forever? ... left recursion?
 typeParser :: Parsec String () Func
 typeParser = parenType <|> funcType <|> simpleType
 

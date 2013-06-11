@@ -5,7 +5,7 @@ import Text.Parsec.Prim
 import Parser
 
 testSimple input = runParser simpleType () "" input
-testFuncType input = runParser typeP () "" input
+testFuncType input = runParser typeParser () "" input
 
 simple01 = testSimple "Type"
 simple02 = testSimple "type"
