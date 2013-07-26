@@ -1,6 +1,7 @@
 
 module Parser where
 
+import Control.Monad
 import Text.ParserCombinators.Parsec hiding (spaces)
 import System.Environment
 
@@ -12,13 +13,9 @@ symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 
 readExpr :: String -> String
--- TODO:  clearly this cant be the final status of this function
--- normally i dont like case b/c of weird parsing issues that ive had in the past
--- although i dont like its syntactic appearence it looks (semantically) a lot like agda "with" 
--- which feels like a win (at least with does ... not sure about case...) 
-readExpr input = case parse (spaces >> symbol) "" input of
+readExpr input = case parse parseExpr "" input of
     Left err -> "no match: " ++ show err
-    Right val -> "Symbol!!"
+    Right val -> "found value"
 
 spaces :: Parser ()
 -- not sure why we aren't using the official 'spaces' function 
@@ -34,4 +31,21 @@ parseString = do
     char '"'
     return $ String x
 
+parseAtom :: Parser LispVal
+parseAtom = do
+    first <- letter <|> symbol
+    rest <- many (letter <|> digit <|> symbol)
+    let atom = first : rest
+    return $ case atom of
+        "#t" -> Bool True
+        "#f" -> Bool False
+        _ -> Atom atom
 
+parseNumber :: Parser LispVal
+-- cool, first timme Ive had need of liftM
+parseNumber = liftM (Number . read) $ many1 digit
+
+parseExpr :: Parser LispVal
+parseExpr = parseAtom
+    <|> parseString
+    <|> parseNumber
