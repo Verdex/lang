@@ -77,7 +77,7 @@ there's a lot of different analogs for the :.  let blah *=* or case x *of*
 --]]
 
 
-function consumeAll( name, target, str, index )
+local function consumeAll( name, target, str, index )
     local count = 0
     local c = string.sub( str, index, index ) 
     while string.match( c, target ) do
@@ -89,6 +89,35 @@ function consumeAll( name, target, str, index )
     return { name = name; count = count }, index -- TODO might want lexeme constructor
 end
 
+local function keyword( key )
+    return function ( str )
+        return key == str 
+    end
+end
+
+local function cEntry( matcher, conser )
+    return { m = matcher; c = conser }
+end
+
+local cTable = {
+    -- TODO get a lexeme library for some of the lexeme structures and
+    -- replace my crapy cons function here
+    cEntry( keyword "def", function ( ) return { name = "def" } end ),
+}
+
+--[[
+    Converts a string into a lexeme
+--]]
+local function convert( str )
+     
+    for _, v in ipairs( cTable ) do
+        if v.m( str ) then
+            return v.c( str )
+        end
+    end
+
+
+end
 
 --[[
     input string
