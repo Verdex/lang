@@ -1,6 +1,7 @@
 
 --module( ..., package.seeall ) -- TODO uncomment
 
+require "lexeme"
 
 --[[
 
@@ -102,7 +103,7 @@ end
 local cTable = {
     -- TODO get a lexeme library for some of the lexeme structures and
     -- replace my crapy cons function here
-    cEntry( keyword "def", function ( ) return { name = "def" } end ),
+    cEntry( keyword "def", lexeme.mk_def ),
 }
 
 --[[
@@ -115,7 +116,6 @@ local function convert( str )
             return v.c( str )
         end
     end
-
 
 end
 
@@ -132,7 +132,7 @@ function lex( str )
         -- %c characters count as %s characters so %c needs to
         -- be checked first
         if string.match( c, "%c" ) then 
-            print( string.sub( str, j, i - 1 ) ) -- TODO throw into array 
+            print( convert( string.sub( str, j, i - 1 ) ).name ) -- TODO throw into array 
             local b, n = consumeAll( "endLine", "%c", str, i ) -- TODO throw into array
             print( "name " .. b.name )
             print( "count " .. b.count )
@@ -140,7 +140,7 @@ function lex( str )
             i = n
             j = i 
         elseif string.match( c, "%s" ) then
-            print( string.sub( str, j, i - 1 ) )
+            print( convert( string.sub( str, j, i - 1 ) ).name )
             local b, n = consumeAll( "space", "%s", str, i )
             print( "name " .. b.name )
             print( "count " .. b.count )
