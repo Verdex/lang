@@ -1,5 +1,5 @@
 
-module( ..., package.seeall )
+--module( ..., package.seeall ) -- TODO uncomment
 
 
 --[[
@@ -76,12 +76,62 @@ Haskell style seems to suggest more or less the same thing as python except
 there's a lot of different analogs for the :.  let blah *=* or case x *of*
 --]]
 
+
+function consumeAll( name, target, str, index )
+    local count = 0
+    local c = string.sub( str, index, index ) 
+    while string.match( c, target ) do
+        count = count + 1
+        index = index + 1
+        c = string.sub( str, index, index )
+    end
+
+    return { name = name; count = count }, index -- TODO might want lexeme constructor
+end
+
+
 --[[
     input string
     ouput array lexeme
 --]]
 function lex( str )
 
-    
+    local i = 1
+    local j = 1
+    while i <= #str do
+        local c = string.sub( str, i, i )
+        -- %c characters count as %s characters so %c needs to
+        -- be checked first
+        if string.match( c, "%c" ) then 
+            print( string.sub( str, j, i - 1 ) ) -- TODO throw into array 
+            local b, n = consumeAll( "endLine", "%c", str, i ) -- TODO throw into array
+            print( "name " .. b.name )
+            print( "count " .. b.count )
+            print( "n " .. n )
+            i = n
+            j = i 
+        elseif string.match( c, "%s" ) then
+            print( string.sub( str, j, i - 1 ) )
+            local b, n = consumeAll( "space", "%s", str, i )
+            print( "name " .. b.name )
+            print( "count " .. b.count )
+            print( "n " .. n )
+            i = n
+            j = i 
+        else
+            i = i + 1
+        end
+    end
+
+    if j ~= i then
+        print( string.sub( str, j, i ) )
+    end
 
 end
+
+
+
+--[[ 
+go until you see whitespace ... depending on what state we're in
+we're going to do something different about the whitespace
+--]]
