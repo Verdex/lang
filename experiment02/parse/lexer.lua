@@ -78,7 +78,7 @@ there's a lot of different analogs for the :.  let blah *=* or case x *of*
 --]]
 
 
-local function consumeAll( name, target, str, index )
+local function consumeAll( cons, target, str, index )
     local count = 0
     local c = string.sub( str, index, index ) 
     while string.match( c, target ) do
@@ -87,7 +87,7 @@ local function consumeAll( name, target, str, index )
         c = string.sub( str, index, index )
     end
 
-    return { name = name; count = count }, index -- TODO might want lexeme constructor
+    return cons( count ), index 
 end
 
 local function keyword( key )
@@ -125,6 +125,8 @@ end
 --]]
 function lex( str )
 
+    local ls = {}
+
     local i = 1
     local j = 1
     while i <= #str do
@@ -132,19 +134,17 @@ function lex( str )
         -- %c characters count as %s characters so %c needs to
         -- be checked first
         if string.match( c, "%c" ) then 
-            print( convert( string.sub( str, j, i - 1 ) ).name ) -- TODO throw into array 
-            local b, n = consumeAll( "endLine", "%c", str, i ) -- TODO throw into array
-            print( "name " .. b.name )
-            print( "count " .. b.count )
-            print( "n " .. n )
+            local wordLex = convert( string.sub( str, j, i - 1 ) )
+            local endLex, n = consumeAll( lexeme.mk_endline, "%c", str, i ) 
+            ls[#ls+1] = wordLex
+            ls[#ls+1] = endLex
             i = n
             j = i 
         elseif string.match( c, "%s" ) then
-            print( convert( string.sub( str, j, i - 1 ) ).name )
-            local b, n = consumeAll( "space", "%s", str, i )
-            print( "name " .. b.name )
-            print( "count " .. b.count )
-            print( "n " .. n )
+            local wordLex = convert( string.sub( str, j, i - 1 ) )
+            local spaceLex, n = consumeAll( lexeme.mk_space, "%s", str, i )
+            ls[#ls+1] = wordLex
+            ls[#ls+1] = spaceLex 
             i = n
             j = i 
         else
@@ -153,8 +153,11 @@ function lex( str )
     end
 
     if j ~= i then
-        print( string.sub( str, j, i ) )
+        local wordLex = convert( string.sub( str, j, i ) )
+        ls[#ls+1] = wordLex 
     end
+
+    return ls
 
 end
 
