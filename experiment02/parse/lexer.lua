@@ -96,14 +96,19 @@ local function keyword( key )
     end
 end
 
+local function identifier( str )
+    return string.match( str, "%w+" )
+end
+
 local function cEntry( matcher, conser )
     return { m = matcher; c = conser }
 end
 
 local cTable = {
-    -- TODO get a lexeme library for some of the lexeme structures and
-    -- replace my crapy cons function here
     cEntry( keyword "def", lexeme.mk_def ),
+    -- identifier will match a lot of keywords as well, 
+    -- make sure to place it last
+    cEntry( identifier, lexeme.mk_identifier ), 
 }
 
 --[[
