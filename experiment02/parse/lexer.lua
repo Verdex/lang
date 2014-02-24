@@ -110,13 +110,11 @@ local cTable = {
     Converts a string into a lexeme
 --]]
 local function convert( str )
-     
     for _, v in ipairs( cTable ) do
         if v.m( str ) then
             return v.c( str )
         end
     end
-
 end
 
 --[[
