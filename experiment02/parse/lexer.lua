@@ -97,7 +97,15 @@ local function keyword( key )
 end
 
 local function identifier( str )
+    -- TODO expand this to work with underscore and any other 
+    -- symbols that I want in identifiers
     return string.match( str, "%w+" )
+end
+
+local function number( str )
+    -- right now only get generic integers working
+    -- worry about the full spectrum of numbers later
+    return string.match( str, "%d+" )
 end
 
 local function cEntry( matcher, conser )
@@ -106,6 +114,7 @@ end
 
 local cTable = {
     cEntry( keyword "def", lexeme.mk_def ),
+    cEntry( number, lexeme.mk_number ), 
     -- identifier will match a lot of keywords as well, 
     -- make sure to place it last
     cEntry( identifier, lexeme.mk_identifier ), 
