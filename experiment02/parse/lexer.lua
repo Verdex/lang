@@ -179,3 +179,15 @@ end
 go until you see whitespace ... depending on what state we're in
 we're going to do something different about the whitespace
 --]]
+
+
+--[[
+once the space algorithm stuff is out of the way (part one is in lex right now
+and part two will be adding scope data to the lexeme array) it looks a lot 
+like mk_*, is_*, and match_* (right now the match functions are just spread
+around in this file) are all related to each other.  There's probably a better
+way to structure this stuff (and maybe even a way to largely abstract lexers)
+... I'm not sure if that just looks like using a lex generator (somehow
+I'm not sure that it does because they are missing good ways to abstract
+within their input), but I'll see when I finish the space/scoping stuff
+--]]
