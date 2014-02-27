@@ -17,6 +17,14 @@ function mk_space( space_count )
     return { name = "space"; count = space_count }
 end
 
+function mk_leftParen()
+    return { name = "leftParen" }
+end
+
+function mk_rightParen()
+    return { name = "rightParen" }
+end
+
 function mk_number( num )
     -- only one number type for now
     -- if my more ambitious ideas work out I'll worry about making
@@ -37,3 +45,5 @@ is_endline = is "endline"
 is_space = is "space"
 is_identifier = is "identifier"
 is_number = is "number"
+is_leftParen = is "leftParen"
+is_rightParen = is "rightParen"

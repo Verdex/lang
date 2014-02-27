@@ -90,7 +90,7 @@ local function consumeAll( cons, target, str, index )
     return cons( count ), index 
 end
 
-local function keyword( key )
+local function matchString( key )
     return function ( str )
         return key == str 
     end
@@ -113,7 +113,9 @@ local function cEntry( matcher, conser )
 end
 
 local cTable = {
-    cEntry( keyword "def", lexeme.mk_def ),
+    cEntry( matchString "(", lexeme.mk_leftParen ),
+    cEntry( matchString ")", lexeme.mk_rightParen ),
+    cEntry( matchString "def", lexeme.mk_def ),
     cEntry( number, lexeme.mk_number ), 
     -- identifier will match a lot of keywords as well, 
     -- make sure to place it last
