@@ -25,6 +25,18 @@ function mk_rightParen()
     return { name = "rightParen" }
 end
 
+function mk_colon()
+    return { name = "colon" }
+end
+
+function mk_plus()
+    return { name = "plus" }
+end
+
+function mk_minus()
+    return { name = "minus" }
+end
+
 function mk_number( num )
     -- only one number type for now
     -- if my more ambitious ideas work out I'll worry about making
@@ -47,3 +59,6 @@ is_identifier = is "identifier"
 is_number = is "number"
 is_leftParen = is "leftParen"
 is_rightParen = is "rightParen"
+is_colon = is "colon"
+is_plus = is "plus"
+is_minus = is "minus"

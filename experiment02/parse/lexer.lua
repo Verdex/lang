@@ -115,6 +115,9 @@ end
 local cTable = {
     cEntry( matchString "(", lexeme.mk_leftParen ),
     cEntry( matchString ")", lexeme.mk_rightParen ),
+    cEntry( matchString ":", lexeme.mk_colon ),
+    cEntry( matchString "+", lexeme.mk_plus ),
+    cEntry( matchString "-", lexeme.mk_minus ),
     cEntry( matchString "def", lexeme.mk_def ),
     cEntry( number, lexeme.mk_number ), 
     -- identifier will match a lot of keywords as well, 
