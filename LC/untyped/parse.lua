@@ -9,48 +9,43 @@
     | \ var . \-term
     | \-term \-term 
 
-parser : string -> ([AST] | failure, string) 
-       : string -> bool, [AST], string
-       : string -> false
-       : string -> true, [AST], string
+parser a : string -> ( bool, a, string )
+       | string -> false, nil, string
+       | string -> true, a, string
 
 --]]
 
 
-local function mk_string( str, index )
+function mk_string( str, index )
     index = index or 1
     return { str = str, index = index }
 end
 
--- match that takes my string and runs the lua pattern engine given a pattern
--- maybe just want simple string compare ... anyway create and return new 
--- my string with new index (use recursion as backtrace to kill the bad indices on failure)
-
--- [parser] -> parser
-function compose( pasers ) 
-    return function ( str )
-        local asts = {}
-        for parser in ipairs( parsers ) do
-            local success, ast
-            success, ast, str = parser( string ) -- string being assigned is different?
-            if not success then
-                return false
-            end
-            asts[#asts + 1] = ast
+-- parser string
+function get_string( value )
+    return function( str )
+        local l = string.len( value )
+        local m = string.sub( str.str, str.index, str.index + l - 1 )
+        print( l, m )
+        if m == value then
+            return true, value, mk_string( str.str, str.index + l )
         end
-        return true, asts, str
+        return false, nil, str
     end
 end
 
-function eat_nothing_success( str )
-
+-- parser a -> (a -> parser b) -> parser b 
+function bind( parser, action ) 
+    return function ( str )
+        local success, result, str2 = parser( str )
+        if not success then
+            return false, nil, str
+        end
+        return action( result )( str2 )
+    end
 end
 
-function eat_nothing_fail( str )
-    return false
-end
-
-local function alternative( parsers )
+function alternative( parsers )
      
 end
 
