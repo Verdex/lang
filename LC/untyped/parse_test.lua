@@ -7,14 +7,17 @@ function test_get_variable( var_name )
 
     if not suc then
         print( var_name .. ": fail on success" )
+        return
     end
 
     if not( str.index == string.len( var_name ) + 1 ) then
         print( var_name .. ": fail on str.index" )
+        return
     end
 
     if not( res == var_name ) then
         print( var_name .. ": fail on result" )
+        return
     end
 
     print( var_name .. ": pass" )
@@ -26,14 +29,17 @@ function fail_get_variable( var_name )
 
     if suc then
         print( var_name .. ": fail on success" )
+        return
     end
 
     if not( str.index == 1 ) then
         print( var_name .. ": fail on str.index" )
+        return
     end
 
     if res then
         print( var_name .. ": fail on result" )
+        return
     end
 
     print( var_name .. ": pass" )

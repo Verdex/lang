@@ -70,12 +70,10 @@ end
 
 -- parser a -> parser [a]
 function oneOrMore( p )
-    return bind( p, 
-        function ( first ) return bind( zeroOrMore( p ), 
-        function ( rest ) 
-            table.insert( rest, 1, first ) 
-            return unit( rest )
-        end ) end )
+    return bind( p, function ( first ) 
+    return bind( zeroOrMore( p ), function ( rest ) 
+    table.insert( rest, 1, first ) 
+    return unit( rest ) end ) end )
 end
 
 -- string -> parser string
