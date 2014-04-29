@@ -45,8 +45,23 @@ function bind( parser, action )
     end
 end
 
-function alternative( parsers )
-     
+-- a -> parser a
+function unit( a )
+    return function ( str )
+        return true, a, str
+    end
+end
+
+-- parser a -> parser b -> parser (a|b)
+function alternative( a, b )
+    return function ( str )
+        local success, result, str2 = a( str )
+        if success then
+            return true, result, str2
+        end
+        success, result, str2 = b( str )
+        return success, result, str2
+    end
 end
 
 
