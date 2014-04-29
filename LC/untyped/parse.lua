@@ -1,5 +1,5 @@
 
---module( ..., package.seeall )
+module( ..., package.seeall )
 
 --[[
 
@@ -17,46 +17,9 @@ parser a : string -> ( bool, a, string )
 
 --]]
 
-
 function mk_string( str, index )
     index = index or 1
     return { str = str, index = index }
-end
-
--- string -> parser string
-function get_string( value )
-    return function( str )
-        local l = string.len( value )
-        local m = string.sub( str.str, str.index, str.index + l - 1 )
-        if m == value then
-            return true, value, mk_string( str.str, str.index + l )
-        end
-        return false, nil, str
-    end
-end
-
--- parser number
-function get_anyDigit( str )
-    local sub = string.sub( str.str, str.index, str.index )
-    local match = string.match( sub, "%d" ) 
-    if match then
-        return true, tonumber( match ), mk_string( str.str, str.index + 1 )
-    end
-    return false, nil, str
-end
-
--- parser string
-function get_anyLetter( str )
-    local sub = string.sub( str.str, str.index, str.index )
-    local match = string.match( sub, "%a" ) 
-    if match then
-        return true, match, mk_string( str.str, str.index + 1 )
-    end
-    return false, nil, str
-end
-
--- parser string
-function get_variable( str )
 end
 
 -- parser a -> (a -> parser b) -> parser b 
@@ -114,3 +77,42 @@ function oneOrMore( p )
             return unit( rest )
         end ) end )
 end
+
+-- string -> parser string
+function get_string( value )
+    return function( str )
+        local l = string.len( value )
+        local m = string.sub( str.str, str.index, str.index + l - 1 )
+        if m == value then
+            return true, value, mk_string( str.str, str.index + l )
+        end
+        return false, nil, str
+    end
+end
+
+-- parser number
+function get_anyDigit( str )
+    local sub = string.sub( str.str, str.index, str.index )
+    local match = string.match( sub, "%d" ) 
+    if match then
+        return true, tonumber( match ), mk_string( str.str, str.index + 1 )
+    end
+    return false, nil, str
+end
+
+-- parser string
+function get_anyLetter( str )
+    local sub = string.sub( str.str, str.index, str.index )
+    local match = string.match( sub, "%a" ) 
+    if match then
+        return true, match, mk_string( str.str, str.index + 1 )
+    end
+    return false, nil, str
+end
+
+-- parser string
+-- var = (_|char) .. (_|char|digit)*
+get_variable = bind( alternative{ get_string "_", get_anyLetter }, function ( first )
+    return bind( zeroOrMore( alternative{ get_string "_", get_anyLetter, get_anyDigit } ), function ( rest )
+    table.insert( rest, 1, first )
+    return unit( table.concat( rest ) ) end ) end ) 
