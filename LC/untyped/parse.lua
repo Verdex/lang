@@ -9,6 +9,8 @@
     | \ var . \-term
     | \-term \-term 
 
+var = (_|char) .. (_|char|digit)*
+
 parser a : string -> ( bool, a, string )
        | string -> false, nil, string
        | string -> true, a, string
@@ -26,7 +28,6 @@ function get_string( value )
     return function( str )
         local l = string.len( value )
         local m = string.sub( str.str, str.index, str.index + l - 1 )
-        print( l, m )
         if m == value then
             return true, value, mk_string( str.str, str.index + l )
         end
@@ -36,7 +37,6 @@ end
 
 -- parser string
 function get_variable( str )
-     
 end
 
 -- parser a -> (a -> parser b) -> parser b 
@@ -45,7 +45,7 @@ function bind( parser, action )
         local success, result, str2 = parser( str )
         if not success then
             return false, nil, str
-        e nd
+        end
         return action( result )( str2 )
     end
 end
@@ -70,3 +70,27 @@ function alternative( ps )
     end
 end
 
+-- parser a -> parser [a]
+function zeroOrMore( p )
+    return function ( str )
+        local results = {}
+        repeat 
+            local success, result, str2 = p( str )
+            if not success then
+                return true, results, str
+            end
+            results[#results + 1] = result
+            str = str2
+        until false 
+    end
+end
+
+-- parser a -> parser [a]
+function oneOrMore( p )
+    return bind( p, 
+        function ( first ) return bind( zeroOrMore( p ), 
+        function ( rest ) 
+            table.insert( rest, 1, first ) 
+            return unit( rest )
+        end ) end )
+end
