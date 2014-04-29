@@ -35,6 +35,26 @@ function get_string( value )
     end
 end
 
+-- parser number
+function get_anyDigit( str )
+    local sub = string.sub( str.str, str.index, str.index )
+    local match = string.match( sub, "%d" ) 
+    if match then
+        return true, tonumber( match ), mk_string( str.str, str.index + 1 )
+    end
+    return false, nil, str
+end
+
+-- parser string
+function get_anyLetter( str )
+    local sub = string.sub( str.str, str.index, str.index )
+    local match = string.match( sub, "%a" ) 
+    if match then
+        return true, match, mk_string( str.str, str.index + 1 )
+    end
+    return false, nil, str
+end
+
 -- parser string
 function get_variable( str )
 end
