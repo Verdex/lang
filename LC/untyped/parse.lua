@@ -21,7 +21,7 @@ function mk_string( str, index )
     return { str = str, index = index }
 end
 
--- parser string
+-- string -> parser string
 function get_string( value )
     return function( str )
         local l = string.len( value )
@@ -34,13 +34,18 @@ function get_string( value )
     end
 end
 
+-- parser string
+function get_variable( str )
+     
+end
+
 -- parser a -> (a -> parser b) -> parser b 
 function bind( parser, action ) 
     return function ( str )
         local success, result, str2 = parser( str )
         if not success then
             return false, nil, str
-        end
+        e nd
         return action( result )( str2 )
     end
 end
@@ -52,18 +57,16 @@ function unit( a )
     end
 end
 
--- parser a -> parser b -> parser (a|b)
-function alternative( a, b )
+-- [parser ?] -> parser ?
+function alternative( ps )
     return function ( str )
-        local success, result, str2 = a( str )
-        if success then
-            return true, result, str2
+        for _, p in ipairs( ps ) do
+            local success, result, str2 = p( str )
+            if success then
+                return true, result, str2
+            end
         end
-        success, result, str2 = b( str )
-        return success, result, str2
+        return false, nil, str 
     end
 end
-
-
-
 
