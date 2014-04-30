@@ -120,15 +120,15 @@ function get_whiteSpace( str )
     return false, nil, str
 end
 
--- parser string
--- var = (_|char) .. (_|char|digit)*
+-- parser variable 
 function get_variable( str )
     return bind( alternative{ get_string "_", get_anyLetter }, function ( first )
     return bind( zeroOrMore( alternative{ get_string "_", get_anyLetter, get_anyDigit } ), function ( rest )
     table.insert( rest, 1, first )
-    return unit( table.concat( rest ) ) end ) end )( str )
+    return unit( lang.mk_variable( table.concat( rest ) ) ) end ) end )( str )
 end
 
+-- parser abstraction
 function get_abstraction( str )
     return bind( get_string "\\", function ( lambda )
     return bind( zeroOrMore( get_whiteSpace ), function ( ws1 )
