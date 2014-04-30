@@ -1,4 +1,6 @@
 
+require "lang"
+
 module( ..., package.seeall )
 
 --[[
@@ -109,8 +111,36 @@ function get_anyLetter( str )
 end
 
 -- parser string
+function get_whiteSpace( str )
+    local sub = string.sub( str.str, str.index, str.index )
+    local match = string.match( sub, "%s" ) 
+    if match then
+        return true, match, mk_string( str.str, str.index + 1 )
+    end
+    return false, nil, str
+end
+
+-- parser string
 -- var = (_|char) .. (_|char|digit)*
-get_variable = bind( alternative{ get_string "_", get_anyLetter }, function ( first )
+function get_variable( str )
+    return bind( alternative{ get_string "_", get_anyLetter }, function ( first )
     return bind( zeroOrMore( alternative{ get_string "_", get_anyLetter, get_anyDigit } ), function ( rest )
     table.insert( rest, 1, first )
-    return unit( table.concat( rest ) ) end ) end ) 
+    return unit( table.concat( rest ) ) end ) end )( str )
+end
+
+function get_abstraction( str )
+    return bind( get_string "\\", function ( lambda )
+    return bind( zeroOrMore( get_whiteSpace ), function ( ws1 )
+    return bind( get_variable, function ( variableName )
+    return bind( zeroOrMore( get_whiteSpace ), function ( ws2 )
+    return bind( get_string ".", function ( dot )
+    return bind( zeroOrMore( get_whiteSpace ), function ( ws3 )
+    return bind( get_lambdaTerm, function ( term )
+    return unit( lang.mk_abstraction( variableName, term ) ) 
+    end ) end ) end ) end ) end ) end ) end )( str )
+end
+
+function get_lambdaTerm( str )
+    return alternative{ get_variable, get_abstraction }( str )
+end
