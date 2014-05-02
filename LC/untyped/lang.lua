@@ -1,4 +1,5 @@
 
+    
 module( ..., package.seeall )
 
 function mk_abstraction( var, expr )
@@ -9,6 +10,10 @@ function mk_variable( name )
     return { type = "var", name = name }
 end
 
+function mk_application( func, value )
+    return { type = "app", func = func, value = value }
+end
+
 local function is( t )
     return function ( expr )
         return expr.type == t
@@ -17,6 +22,7 @@ end
 
 is_abstraction = is "abs"
 is_variable = is "var"
+is_application = is "app"
 
 function eq( a, b )
     if a.type ~= b.type then
@@ -33,6 +39,9 @@ function eq( a, b )
     if is_variable( a ) then
         return a.name == b.name
     end
-
+    
+    if is_application( a ) then
+        return eq( a.func, b.func ) and eq( a.value, b.value )
+    end
 end
 
