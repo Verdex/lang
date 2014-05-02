@@ -168,6 +168,7 @@ end
 
 function get_applicationHelp( func )
     return bind( zeroOrMore( get_whiteSpace ), function ()
+    -- TODO problem is that get_lambdaTerm recursively calls get_application, which causes apps to construct backwards
     return bind( oneOrMore( get_lambdaTerm ), function ( values )
     return unit( buildApplication( func, values, 1 ) )
     end ) end )
