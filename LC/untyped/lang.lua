@@ -56,7 +56,7 @@ function eq( a, b )
     return false
 end
 
-function toStringLambda( expr )
+function tostring( expr )
     if is_paren( expr ) then
         return "( " .. toStringLambda( expr.expr ) .. " )"
     end
