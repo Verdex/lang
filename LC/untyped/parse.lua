@@ -173,6 +173,7 @@ function get_applicationHelp( func )
     end ) end )
 end
 
+-- TODO fix application
 function get_application( str )
     return bind( alternative{ get_variable, get_abstraction, get_paren }, get_applicationHelp )( str )
 end
