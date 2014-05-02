@@ -167,10 +167,26 @@ function get_applicationHelp( func )
 end
 
 function get_application( str )
-    -- todo add paren to this alternative
-    return bind( alternative{ get_variable, get_abstraction }, get_applicationHelp )( str )
+    return bind( alternative{ get_variable, get_abstraction, get_paren }, get_applicationHelp )( str )
 end
 
 function get_lambdaTerm( str )
-    return alternative{ get_variable, get_abstraction }( str )
+    return alternative{ get_application, get_variable, get_abstraction, get_paren }( str )
+end
+
+function whiteItemWhiteEnd( item )
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    return bind( item, function( i )
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    return bind( endStream, function () 
+    return unit( i )
+    end ) end ) end ) end )
+end
+
+function get_lambdaCalculus( str )
+    return alternative{
+        whiteItemWhiteEnd( get_application ),
+        whiteItemWhiteEnd( get_variable ),
+        whiteItemWhiteEnd( get_abstraction ),
+        whiteItemWhiteEnd( get_paren ) }( str )
 end

@@ -76,13 +76,16 @@ pass_parser( parse.get_application,
              lang.mk_application( lang.mk_variable "a", lang.mk_variable "a" ),
              [[a a]] )
 
-pass_parser( parse.get_application,
-             lang.mk_application( 
-                lang.mk_application( lang.mk_variable "a", lang.mk_variable "b" ),
-                lang.mk_variable "c" ),
-             [[a b c]] )
 
 -- paren
 pass_parser( parse.get_paren,
              lang.mk_paren( lang.mk_variable "a" ),
              [[( a )]] )
+
+
+-- lambda calculus
+pass_parser( parse.get_lambdaCalculus,
+             lang.mk_application( 
+                lang.mk_application( lang.mk_variable "a", lang.mk_variable "b" ),
+                lang.mk_variable "c" ),
+             [[a b c]] )
