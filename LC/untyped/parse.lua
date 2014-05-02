@@ -128,6 +128,16 @@ function get_whiteSpace( str )
     return false, nil, str
 end
 
+function get_paren( str )
+    return bind( get_string "(", function ()
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    return bind( get_lambdaTerm, function ( expr )
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    return bind( get_string ")", function ()
+    return unit( lang.mk_paren( expr ) )
+    end ) end ) end ) end ) end )( str )
+end
+
 -- parser variable 
 function get_variable( str )
     return bind( alternative{ get_string "_", get_anyLetter }, function ( first )
