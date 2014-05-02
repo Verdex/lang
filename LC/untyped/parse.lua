@@ -159,10 +159,17 @@ function get_abstraction( str )
     end ) end ) end ) end ) end ) end ) end )( str )
 end
 
+function buildApplication( f, vs, i )
+    if #vs == i then
+        return lang.mk_application( f, vs[i] )
+    end
+    return buildApplication( lang.mk_application( f, vs[i] ), vs, i + 1 )
+end
+
 function get_applicationHelp( func )
     return bind( zeroOrMore( get_whiteSpace ), function ()
-    return bind( get_lambdaTerm, function ( value )
-    return unit( lang.mk_application( func, value ) )
+    return bind( oneOrMore( get_lambdaTerm ), function ( values )
+    return unit( buildApplication( func, values, 1 ) )
     end ) end )
 end
 
