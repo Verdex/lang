@@ -18,6 +18,7 @@ function pass_parser( parser, expected_expr, expr )
 
     if not lang.eq( expected_expr, res ) then
         print( expr .. ": fail on result" )
+        print( lang.stringify_annotate( expected_expr ) )
         return
     end
 

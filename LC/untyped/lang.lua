@@ -56,20 +56,47 @@ function eq( a, b )
     return false
 end
 
-function tostring( expr )
+function stringify( expr )
     if is_paren( expr ) then
-        return "( " .. toStringLambda( expr.expr ) .. " )"
+        return "( " .. stringify( expr.expr ) .. " )"
     end
     
     if is_abstraction( expr ) then
-        return "\\ " .. expr.var .. " . " .. toStringLambda( expr.expr )
+        return "\\ " .. expr.var .. " . " .. stringify( expr.expr )
     end
 
     if is_application( expr ) then
-        return toStringLambda( expr.func ) .. " " .. toStringLambda( expr.value )
+        return stringify( expr.func ) .. " " .. stringify( expr.value )
     end
 
     if is_variable( expr ) then
         return expr.name
     end
+
+    return nil
 end
+
+function stringify_annotate( expr, depth )
+    depth = depth or 0
+    if is_paren( expr ) then
+        return string.rep( " ", depth ) .. "PAREN\n" .. stringify_annotate( expr.expr, depth + 1 )
+    end
+    
+    if is_abstraction( expr ) then
+        return string.rep( " ", depth ) .. "ABS: " .. expr.var.name .. "\n" 
+            .. stringify_annotate( expr.expr, depth + 1 )
+    end
+
+    if is_application( expr ) then
+        return string.rep( " ", depth ) .. "APP\n" .. stringify_annotate( expr.func, depth + 1 )
+            .. "\n" .. stringify_annotate( expr.value, depth + 1 ) 
+    end
+
+    if is_variable( expr ) then
+        return string.rep( " ", depth ) .. "VAR: " .. expr.name
+    end
+
+    return nil
+end
+
+
