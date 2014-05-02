@@ -56,3 +56,20 @@ function eq( a, b )
     return false
 end
 
+function toStringLambda( expr )
+    if is_paren( expr ) then
+        return "( " .. toStringLambda( expr.expr ) .. " )"
+    end
+    
+    if is_abstraction( expr ) then
+        return "\\ " .. expr.var .. " . " .. toStringLambda( expr.expr )
+    end
+
+    if is_application( expr ) then
+        return toStringLambda( expr.func ) .. " " .. toStringLambda( expr.value )
+    end
+
+    if is_variable( expr ) then
+        return expr.name
+    end
+end
