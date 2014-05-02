@@ -46,6 +46,7 @@ function fail_parser( parser, expr )
     print( expr .. ": pass" )
 end
 
+-- var
 pass_parser( parse.get_variable, lang.mk_variable "_variable", "_variable" )
 pass_parser( parse.get_variable, lang.mk_variable "_variable1234", "_variable1234" )
 pass_parser( parse.get_variable, lang.mk_variable "SomeName", "SomeName" )
@@ -61,10 +62,22 @@ fail_parser( parse.get_variable, "," )
 fail_parser( parse.get_variable, "." ) 
 fail_parser( parse.get_variable, "|blah" )
 
-
+-- abs
 pass_parser( parse.get_abstraction,
              lang.mk_abstraction( lang.mk_variable "a", 
                 lang.mk_abstraction( lang.mk_variable "beta",   
                     lang.mk_abstraction( lang.mk_variable "_123",
                         lang.mk_variable "unknown" ) ) ),
              [[\ a . \ beta . \ _123 . unknown]] )
+
+
+-- app
+pass_parser( parse.get_application,
+             lang.mk_application( lang.mk_variable "a", lang.mk_variable "a" ),
+             [[a a]] )
+
+pass_parser( parse.get_application,
+             lang.mk_application( 
+                lang.mk_application( lang.mk_variable "a", lang.mk_variable "b" ),
+                lang.mk_variable "c" ),
+             [[a b c]] )

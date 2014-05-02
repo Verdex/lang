@@ -42,6 +42,14 @@ function unit( a )
     end
 end
 
+-- parser nil
+function endStream( str )
+    if str.index == string.len( str.str ) + 1 then
+        return true, nil, str
+    end
+    return false, nil, str
+end
+
 -- [parser ?] -> parser ?
 function alternative( ps )
     return function ( str )
@@ -130,15 +138,27 @@ end
 
 -- parser abstraction
 function get_abstraction( str )
-    return bind( get_string "\\", function ( lambda )
-    return bind( zeroOrMore( get_whiteSpace ), function ( ws1 )
+    return bind( get_string "\\", function ()
+    return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( get_variable, function ( variableName )
-    return bind( zeroOrMore( get_whiteSpace ), function ( ws2 )
-    return bind( get_string ".", function ( dot )
-    return bind( zeroOrMore( get_whiteSpace ), function ( ws3 )
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    return bind( get_string ".", function ()
+    return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( get_lambdaTerm, function ( term )
     return unit( lang.mk_abstraction( variableName, term ) ) 
     end ) end ) end ) end ) end ) end ) end )( str )
+end
+
+function get_applicationHelp( func )
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    return bind( get_lambdaTerm, function ( value )
+    return unit( lang.mk_application( func, value ) )
+    end ) end )
+end
+
+function get_application( str )
+    -- todo add paren to this alternative
+    return bind( alternative{ get_variable, get_abstraction }, get_applicationHelp )( str )
 end
 
 function get_lambdaTerm( str )
