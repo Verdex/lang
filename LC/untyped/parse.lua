@@ -159,8 +159,7 @@ function get_abstraction( str )
     end ) end ) end ) end ) end ) end ) end )( str )
 end
 
-function buildApplication( f, vs, i )
-    print( i )
+local function buildApplication( f, vs, i )
     if #vs == i then
         return lang.mk_application( f, vs[i] )
     end
@@ -185,7 +184,7 @@ function get_lambdaTerm( str )
     return alternative{ get_application, get_variable, get_abstraction, get_paren }( str )
 end
 
-function whiteItemWhiteEnd( item )
+local function whiteItemWhiteEnd( item )
     return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( item, function( i )
     return bind( zeroOrMore( get_whiteSpace ), function ()
