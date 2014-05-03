@@ -160,23 +160,25 @@ function get_abstraction( str )
 end
 
 function buildApplication( f, vs, i )
+    print( i )
     if #vs == i then
         return lang.mk_application( f, vs[i] )
     end
     return buildApplication( lang.mk_application( f, vs[i] ), vs, i + 1 )
 end
 
-function get_applicationHelp( func )
-    return bind( zeroOrMore( get_whiteSpace ), function ()
-    -- TODO problem is that get_lambdaTerm recursively calls get_application, which causes apps to construct backwards
-    return bind( oneOrMore( get_lambdaTerm ), function ( values )
-    return unit( buildApplication( func, values, 1 ) )
-    end ) end )
+local function get_applicationHelp( str )
+    return bind( oneOrMore( get_whiteSpace ), function ()
+    return bind( alternative{ get_variable, get_abstraction, get_paren }, function ( value )
+    return unit( value )
+    end ) end )( str )
 end
 
--- TODO fix application
 function get_application( str )
-    return bind( alternative{ get_variable, get_abstraction, get_paren }, get_applicationHelp )( str )
+    return bind( alternative{ get_variable, get_abstraction, get_paren }, function ( func )
+    return bind( oneOrMore( get_applicationHelp ), function ( values )
+    return unit( buildApplication( func, values, 1 ) )
+    end ) end )( str )
 end
 
 function get_lambdaTerm( str )
