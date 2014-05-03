@@ -104,3 +104,8 @@ pass_parser( parse.get_lambdaCalculus,
                 lang.mk_abstraction( lang.mk_variable "b", 
                     lang.mk_application( lang.mk_variable "b", lang.mk_variable "a" ) ) ),
              [[\ a . \ b . b a ]] )
+
+pass_parser( parse.get_lambdaCalculus, 
+             lang.mk_abstraction( lang.mk_variable "a",
+                lang.mk_application( lang.mk_variable "a", lang.mk_variable "a" ) ),
+             [[\ a . a a ]] )
