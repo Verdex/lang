@@ -62,7 +62,7 @@ function stringify( expr )
     end
     
     if is_abstraction( expr ) then
-        return "\\ " .. expr.var .. " . " .. stringify( expr.expr )
+        return "\\ " .. stringify( expr.var ) .. " . " .. stringify( expr.expr )
     end
 
     if is_application( expr ) then
