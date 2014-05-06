@@ -9,7 +9,6 @@ function create_lambda( str )
     local suc, res, _ = parse.get_lambdaCalculus( s )
 
     if not suc then
-        print "here"
         return false
     end
     

@@ -3,15 +3,7 @@ require "lang"
 
 module( ..., package.seeall )
 
---[[
-
-\-term =
-    | ( \-term )
-    | var
-    | \ var . \-term
-    | \-term \-term 
-
-var = (_|char) .. (_|char|digit)*
+--[[ 
 
 parser a : string -> ( bool, a, string )
        | string -> false, nil, string
