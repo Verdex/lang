@@ -4,7 +4,7 @@ require "parse"
 
 module( ..., package.seeall )
 
-function create_lambda( str )
+function compile_lambda( str )
     --local s = parse.mk_string( str )
     --local suc, res, _ = parse.get_lambdaCalculus( s )
 
