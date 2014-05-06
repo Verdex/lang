@@ -30,3 +30,5 @@ function eval_num( n )
 end
 
 
+-- The factorial of 5 is 120
+assert( eval_num( Y( fac )( suc( suc( suc( suc( suc( zero ) ) ) ) ) ) ) == 120 )
