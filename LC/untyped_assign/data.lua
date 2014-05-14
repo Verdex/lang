@@ -96,8 +96,8 @@ function stringify_annotate( expr, depth )
     depth = depth or 0
 
     if is_assignment( expr ) then
-        return string.rep( " ", depth ) .. "ASSIGN: " .. stringify_annotate( expr.name ) 
-            .. " = " .. stringify_annotate( expr.expr )
+        return string.rep( " ", depth ) .. "ASSIGN: " .. expr.name.name
+            .. " =\n" .. stringify_annotate( expr.expr, depth + 1 )
     end
 
     if is_paren( expr ) then
