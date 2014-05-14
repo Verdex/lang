@@ -38,6 +38,13 @@ function eq( a, b )
         return false
     end
 
+    if is_assignment( a ) then
+        if not eq( a.name, b.name ) then
+            return false
+        end
+        return eq( a.expr, b.expr )
+    end
+    
     if is_abstraction( a ) then
         if not eq( a.var, b.var ) then
             return false
@@ -61,6 +68,11 @@ function eq( a, b )
 end
 
 function stringify( expr )
+
+    if is_assignment( expr ) then
+        return stringify( expr.name ) .. " = " .. stringify( expr.expr )
+    end
+    
     if is_paren( expr ) then
         return "( " .. stringify( expr.expr ) .. " )"
     end
@@ -82,6 +94,12 @@ end
 
 function stringify_annotate( expr, depth )
     depth = depth or 0
+
+    if is_assignment( expr ) then
+        return string.rep( " ", depth ) .. "ASSIGN: " .. stringify_annotate( expr.name ) 
+            .. " = " .. stringify_annotate( expr.expr )
+    end
+
     if is_paren( expr ) then
         return string.rep( " ", depth ) .. "PAREN\n" .. stringify_annotate( expr.expr, depth + 1 )
     end
