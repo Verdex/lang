@@ -1,6 +1,10 @@
 
 module( ..., package.seeall )
 
+function mk_assignment( name, expr )
+    return { type = "assign", name = name, expr = expr }
+end
+
 function mk_abstraction( var, expr )
     return { type = "abs", var = var, expr = expr }
 end
@@ -23,6 +27,7 @@ local function is( t )
     end
 end
 
+is_assignment = is "assign"
 is_abstraction = is "abs"
 is_variable = is "var"
 is_application = is "app"
