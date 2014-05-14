@@ -82,20 +82,18 @@ function get_assignment( str )
     end ) end ) end ) end ) end )( str )
 end
 
-local function whiteItemWhiteEnd( item )
+local function whiteItemWhite( item )
     return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( item, function( i )
     return bind( zeroOrMore( get_whiteSpace ), function ()
-    return bind( endStream, function () 
     return unit( i )
-    end ) end ) end ) end )
+    end ) end ) end )
 end
 
 function get_lambdaCalculus( str )
-    return alternative{
-        whiteItemWhiteEnd( get_application ),
-        whiteItemWhiteEnd( get_variable ),
-        whiteItemWhiteEnd( get_abstraction ),
-        whiteItemWhiteEnd( get_paren ) }( str )
+    return bind( zeroOrMore( whiteItemWhite( get_assignment ) ), function ( assignments )
+    return bind( endStream, function ()
+    return unit( assignments )
+    end ) end )( str )
 end
 
