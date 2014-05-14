@@ -78,8 +78,14 @@ function get_assignment( str )
     return bind( get_string "=", function ()
     return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( get_lambdaTerm, function( expr )
+    return bind( zeroOrMore( get_whiteSpace ), function ()
+    -- think i can get rid of the ';' by using a lookahead for '<blah> ='
+    -- alternatively, i can also add in a let form and do lookahead on 'let'
+    -- finally, i can do the haskell / python thing
+    -- for now I just want it working so i can figure out a more modular arch
+    return bind( get_string ";", function ()
     return unit( data.mk_assignment( name, expr ) )
-    end ) end ) end ) end ) end )( str )
+    end ) end ) end ) end ) end ) end ) end )( str )
 end
 
 local function whiteItemWhite( item )

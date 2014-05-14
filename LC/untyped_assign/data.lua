@@ -38,7 +38,7 @@ function eq( a, b )
         return false
     end
 
-    if is_assignment( a ) then
+    if is_assignment( a ) then 
         if not eq( a.name, b.name ) then
             return false
         end
