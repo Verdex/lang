@@ -94,12 +94,64 @@ local function noLuaKeywords( assignments )
     return true
 end
 
+local function boundHelper( ast, topLevel, env ) -- : free variable name 
+    if data.is_abstraction( ast ) then
+        local n = ast.var.name
+        if env[n] then
+            env[n] = env[n] + 1
+        else
+            env[n] = 1
+        end
+
+        local r = boundHelper( ast.expr, topLevel, env )
+        
+        env[n] = env[n] - 1
+
+        return r
+    end
+
+    if data.is_variable( ast ) then
+        if not topLevel[ast.name] and (not env[ast.name] or env[ast.name] <= 0 ) then
+            return ast.name
+        else
+            return ""
+        end
+    end
+    
+    if data.is_application( ast ) then
+        return boundHelper( ast.func, topLevel, env ) and 
+            boundHelper( ast.value, topLevel, env )
+    end
+
+    if data.is_paren( ast ) then
+        return boundHelper( ast.expr, topLevel, env )
+    end
+end 
+
+local function allVariablesAreBound( assignments )
+    local topLevel = {}
+    for _, assignment in ipairs( assignments ) do
+        topLevel[assignment.name.name] = true
+    end
+    for _, assignment in ipairs( assignments ) do
+        local value = boundHelper( assignment.expr, topLevel, {} )
+        if value ~= "" then
+            return false, value
+        end
+    end
+    return true
+end
+
 function check( assignments )
     if not allAssignmentsAreUnique( assignments ) then
         return false, "all assigned names must be unique"
     end
     if not noLuaKeywords( assignments ) then
         return false, "you cannot use a lua keyword as an assignment or variable name"
+    end
+    local r, m = allVariablesAreBound( assignments ) 
+    if not r then
+        return false, "unbound variable encountered: " .. m
     end
     return true
  

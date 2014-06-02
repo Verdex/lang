@@ -100,16 +100,40 @@ str8 = parse.mk_string [[
 
 _,pexpr8,_ = lang_parse.get_lambdaCalculus( str8 )
 assert( pexpr8 )
-assert( not check.check( pexpr8 ) )
+r8, m8 = check.check( pexpr8 )
+assert( not r8 )
+assert( m8 == "all assigned names must be unique" )
 
 str9 = parse.mk_string [[
-    blah = ( \ a . a ) ( \ a . goto ) ; 
+    blah = ( \ a . a ) ( \ goto . goto ) ; 
 ]]
 
 _,pexpr9,_ = lang_parse.get_lambdaCalculus( str9 )
 assert( pexpr9 )
-assert( not check.check( pexpr9 ) )
+r9, m9 = check.check( pexpr9 )
+assert( not r9 )
+assert( m9 == "you cannot use a lua keyword as an assignment or variable name" )
 
+str10 = parse.mk_string [[
+    blah = ( \ a . a ) ( \ a . b ) ; 
+]]
+
+_,pexpr10,_ = lang_parse.get_lambdaCalculus( str10 )
+assert( pexpr10 )
+r10, m10 = check.check( pexpr10 )
+assert( not r10 )
+assert( m10 == "unbound variable encountered: b" )
+
+
+str11 = parse.mk_string [[
+    b = \ a . a ;
+    blah = ( \ a . a ) ( \ a . b ) ; 
+    ikky = \ a . \ d . \ c . (\ c . c a d) c ; 
+]]
+
+_,pexpr11,_ = lang_parse.get_lambdaCalculus( str11 )
+assert( pexpr11 )
+assert( check.check( pexpr11 ) )
 
 --[=[
 zero = compile_lambda[[\ f . \ v . v]]
