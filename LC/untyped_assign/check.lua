@@ -4,7 +4,7 @@ require "data"
 module( ..., package.seeall )
 
 -- [assignment] -> bool
-function allNamesAreUnique( assignments )
+local function allAssignmentsAreUnique( assignments )
     local names = {}
     for _, assignment in ipairs( assignments ) do
         if names[assignment.name.name] then
@@ -82,7 +82,7 @@ local function var_hunter( ast, vars )
     end
 end
 
-function noLuaKeywords( assignments )
+local function noLuaKeywords( assignments )
     for _, assignment in ipairs( assignments ) do
         local vars = var_hunter( assignment, {} )
         for _, var in ipairs( vars ) do
@@ -94,3 +94,13 @@ function noLuaKeywords( assignments )
     return true
 end
 
+function check( assignments )
+    if not allAssignmentsAreUnique( assignments ) then
+        return false, "all assigned names must be unique"
+    end
+    if not noLuaKeywords( assignments ) then
+        return false, "you cannot use a lua keyword as an assignment or variable name"
+    end
+    return true
+ 
+end
