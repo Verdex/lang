@@ -49,9 +49,48 @@ local reservedWords = {
     ["while"] = true,
 }
 
+--[[
+This is an example of a function I really don't like.
+There's "communication" going on between the recursive
+calls of this function via the mutable reference to vars.
+In this case nothing's really expected to go wrong. 
+I would be worried if parallel eval was happening.
+--]]
+local function var_hunter( ast, vars )
+    if is_assignment( a ) then 
+        vars[#vars + 1] = a.name
+        return var_hunter( a.expr, vars )
+    end
+    
+    if is_abstraction( a ) then
+        vars = var_hunter( a.var, vars )
+        return var_hunter( a.expr, vars )
+    end
+
+    if is_variable( a ) then
+        vars[#vars + 1] = a
+        return vars 
+    end
+    
+    if is_application( a ) then
+        vars = var_hunter( a.func, vars )
+        return var_hunter( a.value, vars )
+    end
+
+    if is_paren( a ) then
+        return var_hunter( a.expr, vars )
+    end
+end
+
 function noLuaReservedWords( assignments )
     for _, assignment in ipairs( assignments ) do
-        
+        local vars = var_hunter( assignment, {} )
+        for _, var in ipairs( vars ) do
+            if reservedWords[var.name] then
+                return false
+            end
+        end
     end
+    return true
 end
 
