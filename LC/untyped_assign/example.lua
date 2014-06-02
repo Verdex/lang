@@ -3,6 +3,7 @@ require "untyped_assign"
 require "data"
 require "lang_parse"
 require "parse"
+require "check"
 
 --[=[local compile_lambda = untyped_assign.compile_lambda
 
@@ -88,6 +89,8 @@ for _, v in ipairs( pexpr7 ) do
     print( data.stringify( v ) )
     print( data.stringify_annotate( v ) )
 end
+
+assert( check.allNamesAreUnique( pexpr7 ) )
 
 
 --[=[
