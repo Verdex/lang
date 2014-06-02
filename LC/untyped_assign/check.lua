@@ -57,32 +57,32 @@ In this case nothing's really expected to go wrong.
 I would be worried if parallel eval was happening.
 --]]
 local function var_hunter( ast, vars )
-    if is_assignment( a ) then 
-        vars[#vars + 1] = a.name
-        return var_hunter( a.expr, vars )
+    if data.is_assignment( ast ) then 
+        vars[#vars + 1] = ast.name
+        return var_hunter( ast.expr, vars )
     end
     
-    if is_abstraction( a ) then
-        vars = var_hunter( a.var, vars )
-        return var_hunter( a.expr, vars )
+    if data.is_abstraction( ast ) then
+        vars = var_hunter( ast.var, vars )
+        return var_hunter( ast.expr, vars )
     end
 
-    if is_variable( a ) then
-        vars[#vars + 1] = a
+    if data.is_variable( ast ) then
+        vars[#vars + 1] = ast
         return vars 
     end
     
-    if is_application( a ) then
-        vars = var_hunter( a.func, vars )
-        return var_hunter( a.value, vars )
+    if data.is_application( ast ) then
+        vars = var_hunter( ast.func, vars )
+        return var_hunter( ast.value, vars )
     end
 
-    if is_paren( a ) then
-        return var_hunter( a.expr, vars )
+    if data.is_paren( ast ) then
+        return var_hunter( ast.expr, vars )
     end
 end
 
-function noLuaReservedWords( assignments )
+function noLuaKeywords( assignments )
     for _, assignment in ipairs( assignments ) do
         local vars = var_hunter( assignment, {} )
         for _, var in ipairs( vars ) do

@@ -91,6 +91,7 @@ for _, v in ipairs( pexpr7 ) do
 end
 
 assert( check.allNamesAreUnique( pexpr7 ) )
+assert( check.noLuaKeywords( pexpr7 ) )
 
 
 str8 = parse.mk_string [[
@@ -101,6 +102,17 @@ str8 = parse.mk_string [[
 _,pexpr8,_ = lang_parse.get_lambdaCalculus( str8 )
 assert( pexpr8 )
 assert( not check.allNamesAreUnique( pexpr8 ) )
+assert( check.noLuaKeywords( pexpr8 ) )
+
+str9 = parse.mk_string [[
+    blah = ( \ a . a ) ( \ a . goto ) ; 
+]]
+
+_,pexpr9,_ = lang_parse.get_lambdaCalculus( str9 )
+assert( pexpr9 )
+assert( check.allNamesAreUnique( pexpr9 ) )
+assert( not check.noLuaKeywords( pexpr9 ) )
+
 
 --[=[
 zero = compile_lambda[[\ f . \ v . v]]
