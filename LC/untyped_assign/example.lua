@@ -93,6 +93,15 @@ end
 assert( check.allNamesAreUnique( pexpr7 ) )
 
 
+str8 = parse.mk_string [[
+    blah = \ a . a ;
+    blah   = \ b . b b ;
+]]
+
+_,pexpr8,_ = lang_parse.get_lambdaCalculus( str8 )
+assert( pexpr8 )
+assert( not check.allNamesAreUnique( pexpr8 ) )
+
 --[=[
 zero = compile_lambda[[\ f . \ v . v]]
 suc = compile_lambda[[\ n . \ f . \ v . f ( n f v )]]

@@ -38,6 +38,10 @@ end
 function get_abstraction( str )
     return bind( get_string "\\", function ()
     return bind( zeroOrMore( get_whiteSpace ), function ()
+    -- Not sure I really want the parameter to be a variable instead of a string
+    -- you get strange artifacts like abs.name.name in the code.
+    -- I'm going to leave it for now, but the next revision should probably 
+    -- address this better.
     return bind( get_variable, function ( variableName )
     return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( get_string ".", function ()
@@ -73,6 +77,7 @@ function get_lambdaTerm( str )
 end
 
 function get_assignment( str )
+    -- consider get_string instead of get_variable for next revision
     return bind( get_variable, function ( name )
     return bind( zeroOrMore( get_whiteSpace ), function ()
     return bind( get_string "=", function ()
