@@ -1,17 +1,27 @@
 
-require "data"
 require "parse"
+require "lang_parse"
+require "check"
+require "compile"
 
 module( ..., package.seeall )
 
-function compile_lambda( str )
-    --local s = parse.mk_string( str )
-    --local suc, res, _ = parse.get_lambdaCalculus( s )
-
+function eval( str )
+    local s = parse.mk_string( str )
+    local suc, res, s = lang_parse.get_lambdaCalculus( s )
     if not suc then
-        return false
+        return false, "parse fails near index " .. s.index
+    end
+    local suc, mes = check.check( res )
+    if not suc then
+        return false, mes
+    end
+
+    local funcs, mes = compile.compile( res )
+    if not funcs then
+        return false, mes
     end
     
-    return data.luaify( res )
+    return funcs
 end
 
