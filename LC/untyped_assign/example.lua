@@ -122,7 +122,7 @@ _,pexpr10,_ = lang_parse.get_lambdaCalculus( str10 )
 assert( pexpr10 )
 r10, m10 = check.check( pexpr10 )
 assert( not r10 )
-assert( m10 == "unbound variable encountered: b" )
+assert( m10 == "unbound variable encountered:  b  In top level assignment:  blah" )
 
 
 str11 = parse.mk_string [[

@@ -136,7 +136,8 @@ local function allVariablesAreBound( assignments )
     for _, assignment in ipairs( assignments ) do
         local value = boundHelper( assignment.expr, topLevel, {} )
         if value ~= "" then
-            return false, value
+            return false,  "unbound variable encountered:  " .. value 
+                .. "  In top level assignment:  " .. assignment.name.name
         end
     end
     return true
@@ -151,7 +152,7 @@ function check( assignments )
     end
     local r, m = allVariablesAreBound( assignments ) 
     if not r then
-        return false, "unbound variable encountered: " .. m
+        return false, m
     end
     return true
  
