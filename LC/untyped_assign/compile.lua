@@ -3,30 +3,49 @@ require "data"
 
 module( ..., package.seeall )
 
--- compile to final output
+-- [assignment] -> [lua func]
+function compile( assignments )
+    local proto = {}
+    for _, assignment in ipairs( assignments ) do
+        local res, err = load( "return function( topLevel ) return " 
+                                .. compileHelp( assignment.expr, {} ) .. " end" )
+        if not res then
+            return nil, err
+        end
+        proto[#proto + 1] = { n = assignment.name, r = res() }
+    end
+    local funcs = {}
+    for _, p in ipairs( proto ) do
+        funcs[p.n] = p.r( funcs )
+    end
+    return funcs
+end
 
-local function luaifyHelp( expr )
-    if is_paren( expr ) then
-        return "( " .. luaifyHelp( expr.expr ) .. " )"
+local function compileHelp( expr, env )
+    if data.is_paren( expr ) then
+        return "( " .. compileHelp( expr.expr, env ) .. " )"
     end
     
-    if is_abstraction( expr ) then
-        return "function ( " .. luaifyHelp( expr.var ) .. " ) return " .. luaifyHelp( expr.expr ) .. " end"
+    if data.is_abstraction( expr ) then
+        local param = expr.var.name
+        env[param] = (env[param] or 0) + 1 
+        local ret = "function ( " .. param .. " ) return " .. compileHelp( expr.expr, env ) .. " end"
+        env[param] = env[param] - 1
+        return ret
     end
 
-    if is_application( expr ) then
-        return "( " .. luaifyHelp( expr.func ) .. " )( " .. luaifyHelp( expr.value ) .. " )"
+    if data.is_application( expr ) then
+        return "( " .. compileHelp( expr.func, env ) .. " )( " .. compileHelp( expr.value, env ) .. " )"
         
     end
 
-    if is_variable( expr ) then
-        return expr.name
+    if data.is_variable( expr ) then
+        if env[expr.name] and env[expr.name] > 0 then
+            return expr.name
+        else
+            return "topLevel[\"" .. expr.name .. "\"]"
+        end
     end
-
-    return nil
 end
 
-function luaify( expr ) -- TODO probably want to change this name (at least whatever the interface is going to be)
-    return loadstring( "return " .. luaifyHelp( expr ) )()
-end
 
