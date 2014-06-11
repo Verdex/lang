@@ -26,3 +26,18 @@ instance Monad Parser where
     (Parser p) >>= gen = Parser $ \ s -> case p s of
         (Nothing, output) -> (Nothing, output)
         (Just a, output) -> ((\ (Parser n) -> n) $ gen a) output
+
+instance Alternative Parser where
+    empty = Parser $ \ s -> (Nothing, s)
+    (Parser p1) <|> (Parser p2) = Parser $ \ s -> case p1 s of
+        success@(Just a, output) -> success
+        (Nothing, _) -> p2 s
+    -- TODO some is one or more
+    -- TODO many is zero or more
+
+-- TODO make string ?
+-- TODO end stream
+-- TODO get string
+-- TODO get any digit
+-- TODO get any letter
+-- TODO get whitespace
