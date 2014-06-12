@@ -60,18 +60,12 @@ endStream = Parser $ \ ps@(i, s) ->
         True -> (Just (), ps)
         False -> (Nothing, ps)
 
--- getAnyDigit and getWhiteSpace should probably be changed to check more than one char
--- and perform other activities.  I don't think I need them in their current form, but
--- I'm not sure what form I will want them in.  They are just examples right now.
-getAnyDigit = Parser $ \ ps@(i, s) -> 
-    let d = s !! i in
-        case isDigit d of
-            True -> (Just $ digitToInt d, (i + 1, s))
-            False -> (Nothing, ps) 
-
-getWhiteSpace = Parser $ \ ps@(i, s) ->
-    let space = s !! i in
-        case isSpace space of
-            True -> (Just space, (i + 1, s))
+getAnyX recog trans = Parser $ \ ps@(i, s) ->
+    let x = s !! i in
+        case recog x of 
+            True -> (Just $ trans x, (i + 1, s))
             False -> (Nothing, ps)
-            
+
+getAnyDigit = getAnyX isDigit digitToInt
+getWhiteSpace = getAnyX isSpace id
+getAnyLetter = getAnyX isLetter id 

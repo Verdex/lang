@@ -27,6 +27,9 @@ tests =
     , test ((many $ getString "a" <|> getString "b") >> endStream) (i "abbac") (Nothing, (4, "abbac"))
     , test ((many $ getString "a" <|> getString "b") >> endStream) (i "abba") 
             (Just (), (4, "abba"))
+    , test getAnyLetter (i "a") (Just 'a', (1, "a"))
+    , test getAnyDigit (i "5") (Just 5, (1, "5"))
+    , test getWhiteSpace (i " ") (Just ' ', (1, " "))
     ]
 
 main = mapM_ putStrLn tests
