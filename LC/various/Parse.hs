@@ -61,10 +61,13 @@ endStream = Parser $ \ ps@(i, s) ->
         False -> (Nothing, ps)
 
 getAnyX recog trans = Parser $ \ ps@(i, s) ->
-    let x = s !! i in
-        case recog x of 
-            True -> (Just $ trans x, (i + 1, s))
-            False -> (Nothing, ps)
+    case i >= length s of
+        True -> (Nothing, ps )
+        False ->
+            let x = s !! i in
+                case recog x of 
+                    True -> (Just $ trans x, (i + 1, s))
+                    False -> (Nothing, ps)
 
 getAnyDigit = getAnyX isDigit digitToInt
 getWhiteSpace = getAnyX isSpace id
