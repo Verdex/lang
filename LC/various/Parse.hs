@@ -8,6 +8,8 @@ type ParseString = (Int, String)
 
 newtype Parser a = Parser( ParseString -> ( Maybe a, ParseString ) )
 
+parse (Parser p) = p
+
 instance Functor Parser where
     fmap f (Parser p) = Parser $ \ s -> case p s of
         (Nothing, output) -> (Nothing, output)
@@ -15,25 +17,35 @@ instance Functor Parser where
 
 instance Applicative Parser where
     pure a = Parser $ \ s -> (Just a, s)
-    (Parser p1) <*> (Parser p2) = Parser $ \ s -> case p1 s of
+    p1 <*> p2 = Parser $ \ s -> case parse p1 s of
         (Nothing, output1) -> (Nothing, output1)
-        (Just a, output1) -> case p2 output1 of
+        (Just a, output1) -> case parse p2 output1 of
             (Nothing, output2) -> (Nothing, output2)
             (Just b, output2) -> (Just $ a b, output2)
 
 instance Monad Parser where
     return = pure
-    (Parser p) >>= gen = Parser $ \ s -> case p s of
+    p >>= gen = Parser $ \ s -> case parse p s of
         (Nothing, output) -> (Nothing, output)
-        (Just a, output) -> ((\ (Parser n) -> n) $ gen a) output
+        (Just a, output) ->  parse (gen a) output
 
 instance Alternative Parser where
     empty = Parser $ \ s -> (Nothing, s)
-    (Parser p1) <|> (Parser p2) = Parser $ \ s -> case p1 s of
+    p1 <|> p2 = Parser $ \ s -> case parse p1 s of
         success@(Just a, output) -> success
-        (Nothing, _) -> p2 s
-    -- TODO some is one or more
-    -- TODO many is zero or more
+        (Nothing, _) -> parse p2 s
+    -- many is zero or more
+    many p = Parser $ \ s -> case parse p s of
+        (Nothing, output) -> (Just [], output)
+        (Just a, output) -> let (mas, o2) = parse (many p) output in
+            case mas of
+                Nothing -> (Just [a], o2)
+                Just as -> (Just $ a : as, o2) 
+    -- some is one or more
+    some p = do 
+                f <- p
+                r <- many p
+                return (f : r)
 
 -- TODO make string ?
 -- TODO end stream
