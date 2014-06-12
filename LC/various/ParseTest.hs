@@ -19,9 +19,11 @@ tests =
     , test (getString "a" <|> getString "b") (i "a") (Just "a", (1, "a"))
     , test (getString "a" <|> getString "b") (i "c") (Nothing, (0, "c"))
     , test (some $ getString "a") (i "a") (Just ["a"], (1, "a"))
+    , test (some $ getString "a") (i "aaa") (Just ["a", "a", "a"], (3, "aaa"))
     , test (some $ getString "a") (i "") (Nothing, (0, ""))
     , test (many $ getString "a") (i "") (Just [], (0, ""))
     , test (many $ getString "a") (i "aa") (Just ["a","a"], (2, "aa"))
+    , test (many $ getString "a" <|> getString "b") (i "abbac") (Just ["a","b", "b", "a"], (4, "abbac"))
     ]
 
 main = mapM_ putStrLn tests
