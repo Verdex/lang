@@ -3,6 +3,7 @@
 module Parse where
 
 import Control.Applicative
+import Data.Char
 
 type ParseString = (Int, String)
 
@@ -59,6 +60,18 @@ endStream = Parser $ \ ps@(i, s) ->
         True -> (Just (), ps)
         False -> (Nothing, ps)
 
--- TODO get any digit
--- TODO get any letter
--- TODO get whitespace
+-- getAnyDigit and getWhiteSpace should probably be changed to check more than one char
+-- and perform other activities.  I don't think I need them in their current form, but
+-- I'm not sure what form I will want them in.  They are just examples right now.
+getAnyDigit = Parser $ \ ps@(i, s) -> 
+    let d = s !! i in
+        case isDigit d of
+            True -> (Just $ digitToInt d, (i + 1, s))
+            False -> (Nothing, ps) 
+
+getWhiteSpace = Parser $ \ ps@(i, s) ->
+    let space = s !! i in
+        case isSpace space of
+            True -> (Just space, (i + 1, s))
+            False -> (Nothing, ps)
+            
