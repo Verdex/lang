@@ -8,6 +8,8 @@ type ParseString = (Int, String)
 
 newtype Parser a = Parser( ParseString -> ( Maybe a, ParseString ) )
 
+makeParseString :: String -> ParseString
+makeParseString s = (0,s) 
 parse (Parser p) = p
 
 instance Functor Parser where
@@ -47,7 +49,11 @@ instance Alternative Parser where
                 r <- many p
                 return (f : r)
 
--- TODO make string ?
+getString match = Parser $ \ (i, s) -> let l = length match in
+    case match == take l (drop i s) of
+        True -> (Just match, (i + l, s))
+        False -> (Nothing, (i, s) ) 
+
 -- TODO end stream
 -- TODO get string
 -- TODO get any digit
