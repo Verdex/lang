@@ -54,8 +54,11 @@ getString match = Parser $ \ (i, s) -> let l = length match in
         True -> (Just match, (i + l, s))
         False -> (Nothing, (i, s) ) 
 
--- TODO end stream
--- TODO get string
+endStream = Parser $ \ ps@(i, s) -> 
+    case i == length s of
+        True -> (Just (), ps)
+        False -> (Nothing, ps)
+
 -- TODO get any digit
 -- TODO get any letter
 -- TODO get whitespace
