@@ -41,7 +41,10 @@ getApp = do
     return $ buildApp e es 
 
     where getAppList = do
-            some getWhiteSpace
+            some getWhiteSpace <|> 
+                do
+                    many getWhiteSpace
+                    peakString ")" <|> peakString "("
             e <- getShortLambdaTerm
             return e
             

@@ -7,21 +7,27 @@ import ParseAst
 import Control.Applicative
 
 
-test parser input result = let o = parse parser input in
-    case result == o of
-        True -> "Pass " ++ show o
-        False -> "Fail " ++ show o
+testLambda input result = let (Just t, o) = parse getLambdaTerm (i input) in
+    case result == t of
+        True -> "Pass " ++ show t 
+        False -> "Fail " ++ show t
 
 i = makeParseString
 
 tests = 
-    [ test getSymbol (i "blah") (Just "blah", (4, "blah"))
-    , test getSymbol (i "_blah") (Just "_blah", (5, "_blah"))
-    , test getSymbol (i "_") (Just "_", (1, "_"))
-    , test getSymbol (i "_1") (Just "_1", (2, "_1"))
-    , test getSymbol (i "_blah1") (Just "_blah1", (6, "_blah1"))
-    , test getSymbol (i "_bl ah1") (Just "_bl", (3, "_bl ah1"))
-    , test getVar (i "_bl ah1") (Just $ Var "_bl", (3, "_bl ah1"))
+    [ testLambda "\\ a . a" $ Abs "a" $ Var "a" 
+    , testLambda "\\ a . \\ b . a" $ Abs "a" $ Abs "b" (Var "a")
+    , testLambda "\\ a . a a" $ Abs "a" $ App (Var "a") (Var "a")
+    , testLambda "\\ a . a a" $ Abs "a" $ App (Var "a") (Var "a")
+    , testLambda "_variable123" $ Var "_variable123" 
+    , testLambda "a b" $ App (Var "a") (Var "b")
+    , testLambda "(\\ a . a) (\\ b . b)" $ App (Abs "a" $ Var "a" ) (Abs "b" $ Var "b") 
+    , testLambda "(\\ a . a) (\\ b . b) c" $ App (App (Abs "a" $ Var "a" ) (Abs "b" $ Var "b")) (Var "c")
+    , testLambda "a b c d" $ App (App (App (Var "a") (Var "b")) (Var "c")) (Var "d")
+    , testLambda "(a)(b)" $ App (Var "a") (Var "b")
+    , testLambda "a(b)" $ App (Var "a") (Var "b")
+    -- TODO fix this parsing case (fails now b/c the end paren is consumed by previous parse)
+    , testLambda "(a)b" $ App (Var "a") (Var "b")
     ]
 
 main = mapM_ putStrLn tests
