@@ -55,6 +55,11 @@ getString match = Parser $ \ (i, s) -> let l = length match in
         True -> (Just match, (i + l, s))
         False -> (Nothing, (i, s) ) 
 
+peakString match = Parser $ \ ps@(i, s) -> let l = length match in
+    case match == take l (drop i s) of
+        True -> (Just match, ps)
+        False -> (Nothing, ps) 
+
 endStream = Parser $ \ ps@(i, s) -> 
     case i == length s of
         True -> (Just (), ps)
