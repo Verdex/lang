@@ -15,4 +15,19 @@ getSymbol = do
 
 getVar = fmap Var getSymbol
 
-    
+getAbs = do
+    getString "\\"
+    many getWhiteSpace
+    var <- getSymbol
+    many getWhiteSpace
+    getString "."
+    many getWhiteSpace
+    expr <- getLambdaTerm 
+    return (Abs var expr)
+
+getApp = undefined
+
+getParen = do
+    get
+
+getLambdaTerm = getApp <|> getVar <|> getAbs <|> getParen
