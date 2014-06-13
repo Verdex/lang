@@ -28,6 +28,11 @@ getAbs = do
 getApp = undefined
 
 getParen = do
-    get
+    getString "("
+    many getWhiteSpace
+    expr <- getLambdaTerm
+    many getWhiteSpace 
+    getString ")"
+    return expr
 
 getLambdaTerm = getApp <|> getVar <|> getAbs <|> getParen
