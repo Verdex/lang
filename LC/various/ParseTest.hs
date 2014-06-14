@@ -30,7 +30,7 @@ tests =
     , test getAnyLetter (i "a") (Just 'a', (1, "a"))
     , test getAnyDigit (i "5") (Just 5, (1, "5"))
     , test getWhiteSpace (i " ") (Just ' ', (1, " "))
-    , test (peakString "blah") (i "blah") (Just "blah", (0, "blah"))
+    , test (lookAhead $ getString "blah") (i "blah") (Just "blah", (0, "blah"))
     ]
 
 main = mapM_ putStrLn tests

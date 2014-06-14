@@ -44,7 +44,7 @@ getApp = do
             some getWhiteSpace <|> 
                 do
                     many getWhiteSpace
-                    peakString ")" <|> peakString "("
+                    lookAhead (getString ")") <|> lookAhead (getString "(")
             e <- getShortLambdaTerm
             return e
             
@@ -52,4 +52,14 @@ getApp = do
      
           buildApp e' (e:[]) = App e' e
           buildApp e' (e:es) = buildApp (App e' e) es
+
+getAssignment = do
+    name <- getSymbol
+    many getWhiteSpace
+    getString "="
+    many getWhiteSpace
+    body <- getLambdaTerm
+    many getWhiteSpace
+    getString ";"
+   
 
