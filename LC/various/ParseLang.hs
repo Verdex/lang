@@ -53,6 +53,7 @@ getApp = do
           buildApp e' (e:[]) = App e' e
           buildApp e' (e:es) = buildApp (App e' e) es
 
+
 getAssignment = do
     name <- getSymbol
     many getWhiteSpace
@@ -61,5 +62,6 @@ getAssignment = do
     body <- getLambdaTerm
     many getWhiteSpace
     getString ";"
+    return $ Assignment name body
    
 

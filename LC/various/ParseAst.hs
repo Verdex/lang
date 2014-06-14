@@ -9,4 +9,4 @@ data Lambda =
 
     deriving (Show, Eq)
 
-
+data Assignment = Assignment String Lambda 
