@@ -11,6 +11,7 @@ i = makeParseString
 
 testLambda = test getLambdaTerm 
 testAssignment = test getAssignment 
+testAssignments = test getAssignments
 
 test parser input result = let (Just t, o) = parse parser (i input) in
     case result == t of
@@ -33,6 +34,11 @@ tests =
     -- TODO fix this parsing case (fails now b/c the end paren is consumed by previous parse)
     , testLambda "(a)b" $ App (Var "a") (Var "b")
     , testAssignment "blah = \\ a . a;" $ Assignment "blah" (Abs "a" (Var "a"))
+    , testAssignments "blah = \\ a . a;" [Assignment "blah" (Abs "a" (Var "a"))]
+    , testAssignments "blah = \\ a . a; ikky = \\ b . b;" 
+        [ Assignment "blah" (Abs "a" (Var "a"))
+        , Assignment "ikky" (Abs "b" (Var "b"))
+        ]
     ]
 
 main = mapM_ putStrLn tests
