@@ -64,4 +64,12 @@ getAssignment = do
     getString ";"
     return $ Assignment name body
    
-
+getAssignments = do
+    assignments <- many $
+        do
+            many getWhiteSpace
+            assignment <- getAssignment
+            many getWhiteSpace
+            return assignment
+    endStream
+    return assignments

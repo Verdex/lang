@@ -7,12 +7,16 @@ import ParseAst
 import Control.Applicative
 
 
-testLambda input result = let (Just t, o) = parse getLambdaTerm (i input) in
+i = makeParseString
+
+testLambda = test getLambdaTerm 
+testAssignment = test getAssignment 
+
+test parser input result = let (Just t, o) = parse parser (i input) in
     case result == t of
         True -> "Pass " ++ show t 
         False -> "Fail " ++ show t
 
-i = makeParseString
 
 tests = 
     [ testLambda "\\ a . a" $ Abs "a" $ Var "a" 
@@ -28,6 +32,7 @@ tests =
     , testLambda "a(b)" $ App (Var "a") (Var "b")
     -- TODO fix this parsing case (fails now b/c the end paren is consumed by previous parse)
     , testLambda "(a)b" $ App (Var "a") (Var "b")
+    , testAssignment "blah = \\ a . a;" $ Assignment "blah" (Abs "a" (Var "a"))
     ]
 
 main = mapM_ putStrLn tests
