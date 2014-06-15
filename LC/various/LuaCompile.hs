@@ -6,6 +6,10 @@ import ParseAst
 
 compileToLua = undefined
 
-stringifyToLua (Var name) = name 
-stringifyToLua (Abs param expr) = "( function ( " ++ param ++ " ) return " ++ stringifyToLua expr ++ " end )" 
-stringifyToLua (App e1 e2) = "( " ++ stringifyToLua e1 ++ " )( " ++ stringifyToLua e2 ++ " )" 
+stringifyToLua env (Var name) 
+    | any (== name) env = name 
+    | otherwise = "topLevel[\"" ++ name ++ "\"]"
+stringifyToLua env (Abs param expr) = 
+    "( function ( " ++ param ++ " ) return " ++ stringifyToLua (param : env) expr ++ " end )" 
+stringifyToLua env (App e1 e2) = 
+    "( " ++ stringifyToLua env e1 ++ " )( " ++ stringifyToLua env e2 ++ " )" 
