@@ -17,6 +17,10 @@ test term lua =
 tests = 
     [ test "\\ a . a" "( function ( a ) return a end )"
     , test "\\ a . a a" "( function ( a ) return ( a )( a ) end )"
+    , test "\\ a . \\ b . a b" 
+        "( function ( a ) return ( function ( b ) return ( a )( b ) end ) end )"
+    , test "\\ a . ( \\ b . a b ) b" 
+        "( function ( a ) return ( ( function ( b ) return ( a )( b ) end ) )( topLevel[\"b\"] ) end )"
     ]
 
 main = mapM_ putStrLn tests
