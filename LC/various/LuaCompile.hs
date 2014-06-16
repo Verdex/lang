@@ -4,7 +4,10 @@ module LuaCompile where
 import ParseAst
 
 
-compileToLua = undefined
+compileToLua as = "function create() \n \
+\ local funcs = {} \n \
+\ " ++ setupAssignments as ++ " \
+\ end"
 
 stringifyToLua env (Var name) 
     | any (== name) env = name 
@@ -14,8 +17,14 @@ stringifyToLua env (Abs param expr) =
 stringifyToLua env (App e1 e2) = 
     "( " ++ stringifyToLua env e1 ++ " )( " ++ stringifyToLua env e2 ++ " )" 
 
-setupAssignments as = map convert as
+setupAssignments as = foldr append "" (map (loadSetup . convert) as)
+
     where convert (Assignment name expr) = (name, 
             "return function( topLevel ) return " ++ stringifyToLua [] expr ++ " end")
 
-loadSetup (name, func) = "funcs[\"" ++ name ++ "\"] = load( \"" ++ func ++ "\" )()( funcs )\n"
+          loadSetup (name, func) = 
+            "funcs[\"" ++ name ++ "\"] = load( \"" ++ func ++ "\" )()( funcs )\n"
+
+          append line prev = prev ++ line ++ "\n"
+
+
