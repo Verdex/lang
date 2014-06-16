@@ -1,5 +1,5 @@
 
-
+dofile "output.lua"
 
 function eval_bool( b ) 
     return b( true )( false )
@@ -9,6 +9,7 @@ function eval_num( n )
     return n( function ( v ) return v + 1 end )( 0 ) 
 end
 
+funcs = create()
 
 -- The factorial of 5 is 120
 suc = funcs.suc
