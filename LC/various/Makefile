@@ -8,3 +8,4 @@ clean :
 	rm -rf a.out
 	rm -rf output.lua
 	rm -rf output.py
+	rm -rf output.rb
