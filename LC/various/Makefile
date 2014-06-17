@@ -1,4 +1,3 @@
-
 all :
 	ghc Compile.hs -o a.out
 
@@ -7,3 +6,4 @@ clean :
 	rm -rf *.o
 	rm -rf a.out
 	rm -rf output.lua
+	rm -rf output.py
