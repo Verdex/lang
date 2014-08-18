@@ -10,10 +10,10 @@ import RubyCompile
 
 import System.Environment
 
-compile compiler i = let (res, _) = parse getAssignments $ makeParseString i in
-    case res of
-        Just r -> compiler r
-        Nothing -> "Failure"
+compile compiler i = let result = parse getAssignments $ makeParseString i in
+    case result of
+        Success r _ -> compiler r
+        Failure _ -> "Failure"
 
 main = do
     inputFileName <- fmap (head) getArgs 

@@ -58,27 +58,27 @@ instance Alternative Parser where
 
 getString match = Parser $ \ (i, s) -> let l = length match in
     case match == take l (drop i s) of
-        True -> (Just match, (i + l, s))
-        False -> (Nothing, (i, s) ) 
+        True -> Success match (i + l, s)
+        False -> Failure (i, s)
 
 lookAhead p = Parser $ \ ps@(i, s) -> 
     case parse p ps of
-        (Just a, _) -> (Just a, ps) 
-        r@(Nothing, _) -> r
+        Success a _ -> Success a ps
+        r@(Failure _) -> r
 
 endStream = Parser $ \ ps@(i, s) -> 
     case i == length s of
-        True -> (Just (), ps)
-        False -> (Nothing, ps)
+        True -> Success () ps
+        False -> Failure ps
 
 getAnyX recog trans = Parser $ \ ps@(i, s) ->
     case i >= length s of
-        True -> (Nothing, ps )
+        True -> Failure ps
         False ->
             let x = s !! i in
                 case recog x of 
-                    True -> (Just $ trans x, (i + 1, s))
-                    False -> (Nothing, ps)
+                    True -> Success (trans x) (i + 1, s)
+                    False -> Failure ps
 
 getAnyDigit = getAnyX isDigit digitToInt
 getWhiteSpace = getAnyX isSpace id
