@@ -34,6 +34,13 @@ instance Applicative Parser where
                 Failure -> Failure
                 Success a ps'' -> Success (f a) ps''
 
+instance Monad Parser where
+    return = pure
+    parser >>= gen = Parser $
+        \ ps -> case parseWith parser ps of
+            Failure -> Failure
+            Success a ps' -> parseWith (gen a) ps'
+
 instance Alternative Parser where
     empty = Parser $ \ ps -> Failure
     parser1 <|> parser2 = Parser $ 
@@ -42,3 +49,14 @@ instance Alternative Parser where
             Failure -> case parseWith parser2 ps of
                 Success a ps' -> Success a ps'
                 Failure -> Failure
+    many parser = Parser $ 
+        \ ps -> case parseWith parser ps of
+            Failure -> Success [] ps
+            Success a ps' -> case parseWith (many parser) ps' of
+                Failure -> Success [a] ps'
+                Success as ps'' -> Success (a : as) ps''
+    some parser = 
+        do
+            a <- parser
+            as <- many parser
+            return (a : as)
