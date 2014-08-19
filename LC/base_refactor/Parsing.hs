@@ -33,3 +33,12 @@ instance Applicative Parser where
             Success f ps' -> case parseWith parser2 ps' of
                 Failure -> Failure
                 Success a ps'' -> Success (f a) ps''
+
+instance Alternative Parser where
+    empty = Parser $ \ ps -> Failure
+    parser1 <|> parser2 = Parser $ 
+        \ ps -> case parseWith parser1 ps of
+            Success a ps' -> Success a ps'
+            Failure -> case parseWith parser2 ps of
+                Success a ps' -> Success a ps'
+                Failure -> Failure
