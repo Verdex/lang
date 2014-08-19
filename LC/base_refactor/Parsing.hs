@@ -24,3 +24,12 @@ instance Functor Parser where
         \ ps -> case parseWith parser ps of
             Success a ps' -> Success (f a) ps'
             Failure -> Failure
+
+instance Applicative Parser where
+    pure a = Parser $ \ ps -> Success a ps
+    parser1 <*> parser2 = Parser $
+        \ ps -> case parseWith parser1 ps of
+            Failure -> Failure
+            Success f ps' -> case parseWith parser2 ps' of
+                Failure -> Failure
+                Success a ps'' -> Success (f a) ps''
