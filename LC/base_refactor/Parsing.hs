@@ -60,3 +60,23 @@ instance Alternative Parser where
             a <- parser
             as <- many parser
             return (a : as)
+
+getAnyX matcher transform = Parser $
+    \ (i,s) -> case i >= length s of
+        True -> Failure
+        False -> let x = s !! i in
+            case matcher x of
+                True -> Success (transform x) (i+1, s)
+                False -> Failure
+
+getAnyDigit = getAnyX isDigit digitToInt
+getWhiteSpace = getAnyX isSpace id
+getAnyAlpha = getAnyX isLetter id
+
+getString str = Parser $
+    \ (i,s) -> 
+        let len = length str 
+        in
+            case str == take len (drop i s) of
+                True -> Success str (i+len,s)
+                False -> Failure
