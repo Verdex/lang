@@ -13,15 +13,19 @@ makeParseString str = (0,str)
 data ParseResult a = 
     Success a ParseString
     | Failure 
+    
+    deriving Show
 
-newtype Parser a = Parser( ParseString -> ParseResult a )
+data Parser a = Parser [String] (ParseString -> ParseResult a)
 
-parseWith (Parser p) = p
+anonParser = Parser [] 
+
+parseWith (Parser _ p) = p
 
 
 instance Functor Parser where
 
-    fmap f parser = Parser $
+    fmap f parser = anonParser $
         \ ps -> 
             case parseWith parser ps 
             of
@@ -31,9 +35,9 @@ instance Functor Parser where
 
 instance Applicative Parser where
 
-    pure a = Parser $ \ ps -> Success a ps
+    pure a = anonParser $ \ ps -> Success a ps
 
-    parser1 <*> parser2 = Parser $
+    parser1 <*> parser2 = anonParser $
         \ ps -> 
             case parseWith parser1 ps 
             of
@@ -49,7 +53,7 @@ instance Monad Parser where
 
     return = pure
 
-    parser >>= gen = Parser $
+    parser >>= gen = anonParser $
         \ ps -> 
             case parseWith parser ps 
             of
@@ -59,9 +63,9 @@ instance Monad Parser where
 
 instance Alternative Parser where
 
-    empty = Parser $ \ ps -> Failure
+    empty = anonParser $ \ ps -> Failure
 
-    parser1 <|> parser2 = Parser $ 
+    parser1 <|> parser2 = anonParser $ 
         \ ps -> 
             case parseWith parser1 ps 
             of
@@ -72,7 +76,7 @@ instance Alternative Parser where
                         Success a ps' -> Success a ps'
                         Failure -> Failure
 
-    many parser = Parser $ 
+    many parser = anonParser $ 
         \ ps -> 
             case parseWith parser ps 
             of
@@ -89,7 +93,16 @@ instance Alternative Parser where
             as <- many parser
             return (a : as)
 
-getAnyX matcher transform = Parser $
+
+end = anonParser $ 
+    \ ps@(i, s) -> 
+        case i == length s 
+        of
+            True -> Success () ps
+            False -> Failure 
+
+
+getAnyX matcher transform = anonParser $
     \ (i,s) -> 
         case i >= length s
         of
@@ -108,7 +121,7 @@ getWhiteSpace = getAnyX isSpace id
 
 getAnyAlpha = getAnyX isLetter id
 
-getString str = Parser $
+getString str = anonParser $
     \ (i,s) -> 
         let len = length str 
         in
