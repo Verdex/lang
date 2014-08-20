@@ -21,4 +21,11 @@ p2 =
         end
         return ()
 
-fail1 = parseWith p2 (makeParseString "jabber556||")
+combinator p = 
+    do
+        (some p) <?> "some name"
+        return ()
+
+p3 = combinator p2
+
+fail1 = parseWith p3 (makeParseString "jabber556|")
