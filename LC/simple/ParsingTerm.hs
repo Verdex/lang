@@ -58,5 +58,5 @@ getAssignments = do
             assignment <- getAssignment
             many getWhiteSpace
             return assignment
-    endStream
+    end
     return assignments

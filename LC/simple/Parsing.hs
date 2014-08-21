@@ -135,3 +135,11 @@ getString str = namedParser ("getString:" ++ str) $
             of
                 True -> Success str (i+len,s)
                 False -> Failure []
+
+lookAhead parser = anonParser $ 
+    \ ps -> 
+        case parseWith parser ps
+        of
+            Success a ps' -> Success a ps
+            f@(Failure _) -> f
+
