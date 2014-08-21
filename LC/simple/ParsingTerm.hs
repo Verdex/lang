@@ -28,10 +28,7 @@ getApp = do
     return $ buildApp e es 
 
     where getAppList = do
-            some getWhiteSpace <|> 
-                do
-                    many getWhiteSpace
-                    lookAhead (getString ")") <|> lookAhead (getString "(")
+            many getWhiteSpace
             e <- getShortLambdaTerm
             return e
             
