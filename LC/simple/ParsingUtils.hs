@@ -8,6 +8,8 @@ import Parsing
 
 getSymbol = 
     do
-        first <- underscore <|> getAnyLetter
-        rest <- many $ underscore <|> getAnyLetter <|> fmap intToDigit getAnyDigit
+        first <- underscore <|> getAnyAlpha
+        rest <- many $ underscore <|> getAnyAlpha <|> fmap intToDigit getAnyDigit
         return $ first : rest
+
+    where underscore = fmap head $ getString "_"
