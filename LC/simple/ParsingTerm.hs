@@ -6,9 +6,10 @@ import Parsing
 import ParsingUtils
 import LangAst
 
-getVar = fmap Var getSymbol
 
 getLambdaTerm = getApp <|> getVar <|> getAbs <|> getParen
+
+getVar = fmap Var getSymbol
 
 getAbs = do
     getString "\\"
