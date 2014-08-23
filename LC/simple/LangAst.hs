@@ -18,8 +18,8 @@ data Assignment = Assignment String Lambda
 
 
 data Type = 
-    Name String
-    | Arrow Type Type 
+    TypeName String
+    | TypeArrow Type Type 
     
     deriving (Show, Eq)
 

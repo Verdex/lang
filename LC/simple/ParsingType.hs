@@ -7,3 +7,7 @@ import ParsingUtils
 import LangAst
 
 
+
+getTypeName = fmap TypeName getTypeSymbol
+
+--getTypeParen = withParens ?typeParser

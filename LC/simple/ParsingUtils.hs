@@ -6,14 +6,20 @@ import Data.Char
 import Parsing
 
 
+underscore = fmap head $ getString "_"
+
+getTypeSymbol =
+    do
+        first <- getAnyAlpha
+        assert (isUpper first)
+        rest <- many $ underscore <|> getAnyAlpha <|> fmap intToDigit getAnyDigit
+        return $ first : rest
+
 getSymbol = 
     do
         first <- underscore <|> getAnyAlpha
         rest <- many $ underscore <|> getAnyAlpha <|> fmap intToDigit getAnyDigit
         return $ first : rest
-
-    where underscore = fmap head $ getString "_"
-
 
 withParens parser =
     do
