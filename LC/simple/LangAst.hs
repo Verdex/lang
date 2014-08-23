@@ -2,6 +2,7 @@
 module LangAst where
 
 
+-- instead of lambda term is probably a better choice
 data Lambda =
     Var String
     | Abs String Lambda
@@ -15,16 +16,13 @@ data Assignment = Assignment String Lambda
 
     deriving (Show, Eq)
 
-data Type = ? 
 
-data DataDef = DataDef String 
+data Type = 
+    Name String
+    | Arrow Type Type 
+    
+    deriving (Show, Eq)
 
+data DataDef = DataDef String Type
 
-
-data IntList = IntCons Int IntList | IntNil
-
-data IntTree = IntLeaf Int | IntNode IntLeaf IntLeaf | IntNil
-
-data IntPair = Right Int | Left Int
-
-data Ikky = Ikky ( Int -> Int )
+    deriving (Show, Eq)
