@@ -143,3 +143,6 @@ lookAhead parser = anonParser $
             Success a ps' -> Success a ps
             f@(Failure _) -> f
 
+assert False = anonParser $ \ ps -> Failure []
+assert True = anonParser $ \ ps -> Success () ps
+        
