@@ -23,6 +23,12 @@ data Type =
     
     deriving (Show, Eq)
 
-data DataDef = DataDef String Type
+data ConsDef = ConsDef { consName :: String
+                       , parameters :: [Type]
+                       }
+    deriving (Show, Eq)
 
+data DataDef = DataDef { typeName :: String
+                       , cons :: [ConsDef]
+                       }
     deriving (Show, Eq)
