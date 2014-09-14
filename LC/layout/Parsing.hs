@@ -12,45 +12,37 @@ makeParseString str = (0,str)
 
 data ParseResult a = 
     Success a ParseString
-    | Failure [String]
+    | Failure 
     
     deriving Show
 
-data Parser a = Parser (Maybe String) (ParseString -> ParseResult a)
+data Parser a = Parser (ParseString -> ParseResult a)
 
-anonParser = Parser Nothing 
-namedParser = (Parser . Just)
-
-parseWith (Parser _ p) = p
-
-withError (Parser Nothing _) = "Anon"
-withError (Parser (Just e) _) = e
-
-(Parser _ p) <?> error = Parser (Just error) p
+parseWith (Parser p) = p
 
 instance Functor Parser where
 
-    fmap f parser = namedParser "fmap" $
+    fmap f parser = Parser $
         \ ps -> 
             case parseWith parser ps 
             of
                 Success a ps' -> Success (f a) ps'
-                Failure es -> Failure $ (withError parser) : es
+                Failure -> Failure 
 
 
 instance Applicative Parser where
 
-    pure a = namedParser "pure" $ \ ps -> Success a ps
+    pure a = Parser $ \ ps -> Success a ps
 
-    parser1 <*> parser2 = namedParser "<*>" $
+    parser1 <*> parser2 = Parser $
         \ ps -> 
             case parseWith parser1 ps 
             of
-                Failure _ -> Failure [] 
+                Failure -> Failure
                 Success f ps' -> 
                     case parseWith parser2 ps' 
                     of
-                        Failure _ -> Failure [] 
+                        Failure -> Failure
                         Success a ps'' -> Success (f a) ps''
 
 
@@ -58,39 +50,38 @@ instance Monad Parser where
 
     return = pure
 
-    parser >>= gen = namedParser "Bind" $
+    parser >>= gen = Parser $
         \ ps -> 
             case parseWith parser ps 
             of
-                Failure es -> Failure $ (withError parser) : es
+                Failure -> Failure 
                 Success a ps' -> parseWith (gen a) ps'
 
 
 instance Alternative Parser where
 
-    empty = namedParser "empty" $ \ ps -> Failure []
+    empty = Parser $ \ ps -> Failure 
 
-    parser1 <|> parser2 = namedParser "<|>" $ 
+    parser1 <|> parser2 = Parser $ 
         \ ps -> 
             case parseWith parser1 ps 
             of
                 Success a ps' -> Success a ps'
-                Failure errors1 -> 
+                Failure -> 
                     case parseWith parser2 ps
                     of
                         Success a ps' -> Success a ps'
-                        Failure errors2 -> Failure ["Left:" ++ (show ((withError parser1) : errors1)) ++ ";" ++
-                                                    "Right:" ++ (show ((withError parser2) : errors2))]
+                        Failure -> Failure 
 
-    many parser = anonParser $ 
+    many parser = Parser $ 
         \ ps -> 
             case parseWith parser ps 
             of
-                Failure _ -> Success [] ps
+                Failure -> Success [] ps
                 Success a ps' -> 
                     case parseWith (many parser) ps' 
                     of
-                        Failure _ -> Success [a] ps'
+                        Failure -> Success [a] ps'
                         Success as ps'' -> Success (a : as) ps''
 
     some parser = 
@@ -100,49 +91,48 @@ instance Alternative Parser where
             return (a : as)
 
 
-end = namedParser "end of stream" $ 
+end = Parser $ 
     \ ps@(i, s) -> 
         case i == length s 
         of
             True -> Success () ps
-            False -> Failure []
+            False -> Failure
 
 
-getAnyX matcher transform = anonParser $
+getAnyX matcher transform = Parser $
     \ (i,s) -> 
         case i >= length s
         of
-            True -> Failure []
+            True -> Failure 
             False -> 
                 let x = s !! i 
                 in
                     case matcher x 
                     of
                         True -> Success (transform x) (i+1, s)
-                        False -> Failure []
+                        False -> Failure
 
-getAnyDigit = (getAnyX isDigit digitToInt) <?> "getAnyDigit"
 
-getWhiteSpace = (getAnyX isSpace id) <?> "getWhiteSpace"
+getAnyDigit = (getAnyX isDigit digitToInt) 
 
-getAnyAlpha = (getAnyX isLetter id) <?> "getAnyAlpha"
+getAnyAlpha = (getAnyX isLetter id) 
 
-getString str = namedParser ("getString:" ++ str) $
+getString str = Parser $
     \ (i,s) -> 
         let len = length str 
         in
             case str == take len (drop i s)
             of
                 True -> Success str (i+len,s)
-                False -> Failure []
+                False -> Failure
 
-lookAhead parser = anonParser $ 
+lookAhead parser = Parser $ 
     \ ps -> 
         case parseWith parser ps
         of
             Success a ps' -> Success a ps
-            f@(Failure _) -> f
+            f@Failure -> f
 
-assert False = anonParser $ \ ps -> Failure []
-assert True = anonParser $ \ ps -> Success () ps
+assert False = Parser $ \ ps -> Failure
+assert True = Parser $ \ ps -> Success () ps
         
