@@ -17,3 +17,4 @@ getSymbol =
 
 
     where underscore = fmap head (getString "_")
+
