@@ -4,38 +4,23 @@ module Parsing where
 import Control.Applicative
 import Data.Char
 
-x = \ a -> a
-x' = \ a -> a 5
-x'' = \ a -> a
-    5
-x''' = \ a ->
-    a 5
 
-y = \ a 
-    -> a 5
+type ParseSource a = (Int, a)
 
-y' = \
-    a -> a 5
+makeParseSource :: a -> ParseSource a
+makeParseSource as = (0,as)
 
-y'' = 
-    \ a -> a 5
-
-type ParseSource = (Int, String)
-
-makeParseSource :: String -> ParseSource
-makeParseSource str = (0,str)
-
-data ParseResult a = 
-    Success a ParseSource
+data ParseResult s a = 
+    Success a (ParseSource s)
     | Failure 
     
     deriving Show
 
-data Parser a = Parser (ParseSource -> ParseResult a)
+data Parser s a = Parser (ParseSource s -> ParseResult s a)
 
 parseWith (Parser p) = p
 
-instance Functor Parser where
+instance Functor (Parser s) where
 
     fmap f parser = Parser $
         \ ps -> 
@@ -45,7 +30,7 @@ instance Functor Parser where
                 Failure -> Failure 
 
 
-instance Applicative Parser where
+instance Applicative (Parser s) where
 
     pure a = Parser $ \ ps -> Success a ps
 
@@ -61,7 +46,7 @@ instance Applicative Parser where
                         Success a ps'' -> Success (f a) ps''
 
 
-instance Monad Parser where
+instance Monad (Parser s) where
 
     return = pure
 
@@ -73,7 +58,7 @@ instance Monad Parser where
                 Success a ps' -> parseWith (gen a) ps'
 
 
-instance Alternative Parser where
+instance Alternative (Parser s) where
 
     empty = Parser $ \ ps -> Failure 
 
@@ -112,7 +97,6 @@ end = Parser $
         of
             True -> Success () ps
             False -> Failure
-
 
 getAnyX matcher transform = Parser $
     \ (i,s) -> 
