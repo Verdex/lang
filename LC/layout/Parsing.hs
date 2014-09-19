@@ -4,19 +4,34 @@ module Parsing where
 import Control.Applicative
 import Data.Char
 
+x = \ a -> a
+x' = \ a -> a 5
+x'' = \ a -> a
+    5
+x''' = \ a ->
+    a 5
 
-type ParseString = (Int, String)
+y = \ a 
+    -> a 5
 
-makeParseString :: String -> ParseString
-makeParseString str = (0,str)
+y' = \
+    a -> a 5
+
+y'' = 
+    \ a -> a 5
+
+type ParseSource = (Int, String)
+
+makeParseSource :: String -> ParseSource
+makeParseSource str = (0,str)
 
 data ParseResult a = 
-    Success a ParseString
+    Success a ParseSource
     | Failure 
     
     deriving Show
 
-data Parser a = Parser (ParseString -> ParseResult a)
+data Parser a = Parser (ParseSource -> ParseResult a)
 
 parseWith (Parser p) = p
 
