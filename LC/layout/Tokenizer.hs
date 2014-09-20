@@ -15,6 +15,20 @@ getSymbol =
         r <- many $ underscore <|> getAnyAlpha <|> (fmap intToDigit getAnyDigit)
         return $ Symbol (f:r)
 
-
     where underscore = fmap head (getString "_")
 
+getSimple :: String -> Token -> Parser String Token
+getSimple s t =
+    do 
+        getString s
+        return t
+
+getArrow = getSimple "->" Arrow
+
+getLParen = getSimple "(" LParen
+
+getRParen = getSimple ")" RParen
+
+getAssign = getSimple "=" Assign
+
+getLambda = getSimple "\\" Lambda

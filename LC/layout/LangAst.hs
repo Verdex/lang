@@ -10,3 +10,5 @@ data Token =
     | Lambda
     | NewLine
     | Space Int
+
+    deriving Show
