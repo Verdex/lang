@@ -34,3 +34,5 @@ getAssign = getSimple "=" Assign
 getLambda = getSimple "\\" Lambda
 
 getNewLine = (getSimple "\r\n" NewLine) <|> (getSimple "\r" NewLine) <|> (getSimple "\n" NewLine)
+
+getSpaces = fmap (LangAst.Space . length) $ some $ getString " "
