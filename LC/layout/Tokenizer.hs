@@ -7,7 +7,24 @@ import LangAst
 import Data.Char
 
 tokenize :: String -> [Token]
-tokenize = undefined
+tokenize str = 
+    case parseWith allTokens (makeParseSource str) 
+    of
+        Success ts _ -> ts
+        Failure -> []
+
+allTokens =
+    do
+        ts <- many $ getSymbol
+                  <|> getArrow
+                  <|> getLParen
+                  <|> getRParen
+                  <|> getAssign
+                  <|> getLambda
+                  <|> getNewLine
+                  <|> getSpaces 
+        end
+        return ts
 
 getSymbol =
     do
