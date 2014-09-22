@@ -1,5 +1,5 @@
 
-module Tokenizer where
+module Tokenizer (tokenize) where
 
 import Control.Applicative
 import Parsing
