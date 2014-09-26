@@ -1,4 +1,6 @@
 
+-- Note that this tokenizer isn't going to work with where, let, or match
+
 module Tokenizer (tokenize) where
 
 import Control.Applicative
