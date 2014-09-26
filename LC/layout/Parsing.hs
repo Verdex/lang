@@ -134,4 +134,3 @@ lookAhead parser = Parser $
 
 assert False = Parser $ \ ps -> Failure
 assert True = Parser $ \ ps -> Success () ps
-        
