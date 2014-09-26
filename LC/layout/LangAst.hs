@@ -12,3 +12,7 @@ data Token =
     | Space Int
 
     deriving Show
+
+data Scope = Scope [Token]
+
+    deriving Show
