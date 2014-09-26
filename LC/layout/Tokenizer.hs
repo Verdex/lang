@@ -1,5 +1,7 @@
 
 -- Note that this tokenizer isn't going to work with where, let, or match
+-- In order to handle that I'm going to need column location
+-- Just adding in line number and column number location probably solves that problem
 
 module Tokenizer (tokenize) where
 
