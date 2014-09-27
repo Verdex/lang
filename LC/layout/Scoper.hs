@@ -5,14 +5,13 @@ import Control.Applicative
 import Parsing
 import LangAst
 
+-- put a new line on the front of the input token stream so that symbol defines at line zero are uniform
 scope :: [Token] -> [Scope]
 scope toks = case parseWith getScopesWithEnd (makeParseSource $ NewLine : toks) 
              of
                 Success s _ -> s
                 Failure -> []
 
-
--- put a new line on the front of the input token stream so that symbol defines at line zero are uniform
 
 getToken tok = getAnyX (tok ==) id
 
