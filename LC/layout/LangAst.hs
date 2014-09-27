@@ -11,8 +11,8 @@ data Token =
     | NewLine
     | Space Int
 
-    deriving Show
+    deriving (Show, Eq)
 
-data Scope = Scope [Token]
+data Scope = Scope String [Token]
 
-    deriving Show
+    deriving (Show, Eq)
