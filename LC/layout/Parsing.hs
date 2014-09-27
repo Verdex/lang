@@ -112,9 +112,9 @@ getAnyX matcher transform = Parser $
                         False -> Failure
 
 
-getAnyDigit = (getAnyX isDigit digitToInt) 
+getAnyDigit = getAnyX isDigit digitToInt
 
-getAnyAlpha = (getAnyX isLetter id) 
+getAnyAlpha = getAnyX isLetter id 
 
 getString str = Parser $
     \ (i,s) -> 
@@ -131,6 +131,25 @@ lookAhead parser = Parser $
         of
             Success a ps' -> Success a ps
             f@Failure -> f
+
+zeroOrOne :: Parser s a -> Parser s (Maybe a)
+zeroOrOne parser = Parser $ 
+    \ ps -> 
+        case parseWith parser ps
+        of 
+            Success a ps' -> Success (Just a) ps'
+            Failure -> Success Nothing ps
+            
+-- Parses 'a' until a 'b' is encountered or a non 'a'
+-- non 'a' is not consumed, 'b' is not consumed
+-- may return a zero length list
+parseUntil :: Parser s a -> Parser s b -> Parser s [a]
+parseUntil pa pb =
+    do
+        as <- many pa
+        lookAhead $ zeroOrOne pb
+        return as
+
 
 assert False = Parser $ \ ps -> Failure
 assert True = Parser $ \ ps -> Success () ps
