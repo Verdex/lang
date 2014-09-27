@@ -144,12 +144,15 @@ zeroOrOne parser = Parser $
 -- non 'a' is not consumed, 'b' is not consumed
 -- may return a zero length list
 parseUntil :: Parser s a -> Parser s b -> Parser s [a]
-parseUntil pa pb =
-    do
-        as <- many pa
-        lookAhead $ zeroOrOne pb
-        return as
-
+parseUntil pa pb = checkForPb <|> getPas
+    
+    where checkForPb = fmap (const []) $ lookAhead pb 
+          getPas= 
+            do 
+                fst <- pa
+                rst <- parseUntil pa pb
+                return $ fst : rst
+          
 
 assert False = Parser $ \ ps -> Failure
 assert True = Parser $ \ ps -> Success () ps
