@@ -147,12 +147,14 @@ parseUntil :: Parser s a -> Parser s b -> Parser s [a]
 parseUntil pa pb = checkForPb <|> getPas
     
     where checkForPb = fmap (const []) $ lookAhead pb 
-          getPas= 
+          getPas = 
             do 
                 fst <- pa
-                rst <- parseUntil pa pb
-                return $ fst : rst
-          
+                rst <- zeroOrOne $ parseUntil pa pb
+                return $ fst : (fromMaybe rst)
+
+          fromMaybe (Just a) = a
+          fromMaybe Nothing = []
 
 assert False = Parser $ \ ps -> Failure
 assert True = Parser $ \ ps -> Success () ps
