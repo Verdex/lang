@@ -2,6 +2,7 @@
 module Tokenizer where
 
 import Control.Applicative
+import Data.List
 import Parsing
 import LangAst
 
@@ -10,37 +11,42 @@ tokenize :: String -> [Token]
 tokenize str = 
     case parseWith allTokens (makeParseSource str) 
     of
-        Success ts _ -> ts
+        Success ts _ -> jabber (map blah ts)
         Failure -> []
+    where blah (Just t) = [t]
+          blah Nothing = []
+
+          jabber = foldl' (++) []
 
 allTokens =
     do
-        ts <- many $ getSpaces
-                  <|> getNewLine  
+        ts <- many $ squashSpaces
+                  <|> squashNewLine  
                   <|> getSymbol
         end
         return ts
 
-getSymbol = some getAnyAlpha
+getSymbol = fmap (Just . LangAst.Symbol) $ some getAnyAlpha
 
--- this
-underscore = fmap (const LangAst.Underscore) (getString "_")
+underscore = getSimple "_"
 
-
-getSimple :: String -> Token -> Parser String Token
+getSimple :: String -> Token -> Parser String (Maybe Token)
 getSimple s t =
     do 
         getString s
-        return t
+        return $ Just t
 
-squashSimple :: String -> Parser String ()
-squashSimple = undefined
+squashSimple :: String -> Parser String (Maybe Token)
+squashSimple s = 
+    do
+        getString s
+        return Nothing 
 
--- squash end line
-getNewLine = undefined  --(getSimple "\r\n" NewLine) <|> (getSimple "\r" NewLine) <|> (getSimple "\n" NewLine)
+squashNewLine :: Parser String (Maybe Token)
+squashNewLine = (squashSimple "\r\n") <|> (squashSimple "\r") <|> (squashSimple "\n")
 
--- squash spaces
-getSpaces = fmap (const ()) $ some $ getString " "
+squashSpaces :: Parser String (Maybe Token)
+squashSpaces = squashSimple " " 
 
 
 

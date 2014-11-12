@@ -15,4 +15,4 @@ data Token = Symbol String
            | Semicolon
            | RParen
            | LParen
-
+    deriving (Show, Eq)
