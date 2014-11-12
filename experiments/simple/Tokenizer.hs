@@ -11,24 +11,39 @@ tokenize :: String -> [Token]
 tokenize str = 
     case parseWith allTokens (makeParseSource str) 
     of
-        Success ts _ -> jabber (map blah ts)
+        Success ts _ -> mapReduce ts
         Failure -> []
-    where blah (Just t) = [t]
-          blah Nothing = []
+    where convert (Just t) = [t]
+          convert Nothing = []
 
-          jabber = foldl' (++) []
+          reduce = foldl' (++) []
 
+          mapReduce = reduce . (map convert)
+
+-- TODO need a remove comments component
 allTokens =
     do
         ts <- many $ squashSpaces
                   <|> squashNewLine  
+                  <|> (getSimple "_" LangAst.Underscore)
+                  <|> (getSimple "match" LangAst.Match)
+                  <|> (getSimple "with" LangAst.With)
+                  <|> (getSimple "let" LangAst.Let)
+                  <|> (getSimple "in" LangAst.In)
+                  <|> (getSimple "end" LangAst.End)
+                  <|> (getSimple "=" LangAst.Assign)
+                  <|> (getSimple "\\" LangAst.Lambda)
+                  <|> (getSimple "->" LangAst.RArrow)
+                  <|> (getSimple ":" LangAst.Colon)
+                  <|> (getSimple ";" LangAst.Semicolon)
+                  <|> (getSimple "(" LangAst.LParen)
+                  <|> (getSimple ")" LangAst.RParen)
                   <|> getSymbol
         end
         return ts
 
-getSymbol = fmap (Just . LangAst.Symbol) $ some getAnyAlpha
 
-underscore = getSimple "_"
+getSymbol = fmap (Just . LangAst.Symbol) $ some getAnyAlpha
 
 getSimple :: String -> Token -> Parser String (Maybe Token)
 getSimple s t =
