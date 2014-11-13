@@ -20,11 +20,11 @@ tokenize str =
 
           mapReduce = reduce . (map convert)
 
--- TODO need a remove comments component
 allTokens =
     do
         ts <- many $ squashSpaces
                   <|> squashNewLine  
+                  <|> squashComment
                   <|> (getSimple "_" LangAst.Underscore)
                   <|> (getSimple "match" LangAst.Match)
                   <|> (getSimple "with" LangAst.With)
@@ -63,5 +63,8 @@ squashNewLine = (squashSimple "\r\n") <|> (squashSimple "\r") <|> (squashSimple 
 squashSpaces :: Parser String (Maybe Token)
 squashSpaces = squashSimple " " 
 
-
-
+squashComment = 
+    do
+        getString "--"
+        parseUntil (getAnyX (const True) (const ())) squashNewLine
+        return Nothing
