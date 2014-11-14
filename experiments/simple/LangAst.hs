@@ -17,6 +17,7 @@ data Token = Symbol String
            | LParen
     deriving (Show, Eq)
 
+-- TODO patterns need to be able to handle recursive patterns
 data Pattern = Pattern { p_cons :: String
                        , p_param :: [String]
                        }
@@ -49,6 +50,7 @@ data Cons = Cons { c_name :: String
                  }
     deriving (Show, Eq)
 
+-- TODO this doesn't seem quite right either
 data TypeDef = TypeDef { td_name :: String
                        , td_cons :: [Cons]
                        }
