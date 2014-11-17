@@ -46,11 +46,10 @@ data Def = Def { d_params :: [String]
     deriving (Show, Eq)
 
 data Cons = Cons { c_name :: String
-                 , c_params :: [String]
+                 , c_params :: [TypeSig]
                  }
     deriving (Show, Eq)
 
--- TODO this doesn't seem quite right either
 data TypeDef = TypeDef { td_name :: String
                        , td_cons :: [Cons]
                        }
