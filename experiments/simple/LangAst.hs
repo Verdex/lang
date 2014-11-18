@@ -17,10 +17,10 @@ data Token = Symbol String
            | LParen
     deriving (Show, Eq)
 
--- TODO patterns need to be able to handle recursive patterns
 data Pattern = Pattern { p_cons :: String
-                       , p_param :: [String]
+                       , p_param :: [Pattern]
                        }
+             | DestructVariable String
     deriving (Show, Eq)
 
 data MatchExpr = MatchExpr { m_target :: Expr
