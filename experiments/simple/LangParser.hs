@@ -12,14 +12,28 @@ parse :: [Token] -> Program
 parse = undefined
 
 
--- TODO the tree structure AST I have built up might end up 
--- kind of sucking b/c I'm going to need to either have a
--- tree structure parser (that might happen otherwise so
--- whatever) or I might need a lot of weird trivial mapings set up.
--- Actually, the tree structures of other parser ASTs I've seen
--- before seemed kind of unnerving (granted the structure
--- kind of comes with the territory ...).  I wonder if there's a
--- way to work that out better.
+pTypeDef :: Parser [Token] TypeDef 
+pTypeDef =
+    do
+        pSimple Data
+        typeName <- pAnySymbol
+        pSimple Assign
+        -- get many cons + param until ; (and | in between)
+        return $ TypeDef { td_name = typeName
+                         , td_cons = []
+                         }   
 
-pData :: [Token] -> TypeDef 
+
+pAnySymbol :: Parser [Token] String
+pAnySymbol = getAnyX matchSymbol projSymbol
+
+    where matchSymbol t = case t 
+                          of
+                              Symbol _ -> True
+                              _ -> False
+
+          projSymbol (Symbol n) = n
+
+pSimple :: Token -> Parser [Token] () 
+pSimple tok = getAnyX (\ v -> v == tok) (const ())
 
