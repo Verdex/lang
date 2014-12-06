@@ -17,6 +17,10 @@ data Token = Symbol String
            | LParen
     deriving (Show, Eq)
 
+data TopLevel = Define Def 
+              | TypeDefine TypeDef 
+    deriving (Show, Eq)
+
 data Pattern = Pattern { p_cons :: String
                        , p_param :: [Pattern]
                        }
@@ -32,6 +36,7 @@ data Expr = EVar String
           | ELet { let_name :: String
                  , let_assign :: Expr 
                  , let_body :: Expr
+                 , let_sig :: TypeSig
                  }
           | EAbs { abs_params :: [String]
                  , abs_body :: Expr
@@ -40,8 +45,9 @@ data Expr = EVar String
           | EMat MatchExpr 
     deriving (Show, Eq)
 
-data Def = Def { d_params :: [String]
+data Def = Def { d_name :: String
                , d_expr :: Expr
+               , d_sig :: TypeSig
                }
     deriving (Show, Eq)
 
