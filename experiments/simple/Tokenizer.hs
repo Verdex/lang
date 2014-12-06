@@ -1,6 +1,8 @@
 
 module Tokenizer where
 
+-- TODO only export tokenize
+
 import Control.Applicative
 import Data.List
 import Parsing
