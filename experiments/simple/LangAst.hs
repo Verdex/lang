@@ -18,6 +18,7 @@ data Token = Symbol String
     deriving (Show, Eq)
 
 data Program = Program [TopLevel]
+    deriving (Show, Eq)
 
 data TopLevel = Define Def 
               | TypeDefine TypeDef 
