@@ -38,6 +38,8 @@ allTokens =
                   <|> (getSimple ";" LangAst.Semicolon)
                   <|> (getSimple "(" LangAst.LParen)
                   <|> (getSimple ")" LangAst.RParen)
+                  <|> (getSimple "|" LangAst.OrBar)
+                  <|> (getSimple "data" LangAst.Data)
                   <|> getSymbol
         end
         return ts

@@ -15,6 +15,8 @@ data Token = Symbol String
            | Semicolon
            | RParen
            | LParen
+           | OrBar
+           | Data
     deriving (Show, Eq)
 
 data Program = Program [TopLevel]
