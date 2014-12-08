@@ -39,6 +39,16 @@ pTypeDef =
 
  -- TODO will need type sig parser so I can get arbitrary types of constructor parameters parsed
 
+pTypeSig :: Parser [Token] TypeSig
+pTypeSig =
+    do
+
+-- x 
+-- x -> x
+-- ( x )
+-- (x -> x) -> x -> x
+
+
 pAnySymbol :: Parser [Token] String
 pAnySymbol = getAnyX matchSymbol projSymbol
 
