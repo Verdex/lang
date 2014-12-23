@@ -23,6 +23,8 @@ parseWith (Parser p) = p
 parseCases :: Parser s a -> ( ParseResult s a -> ParseResult s b ) -> Parser s b 
 parseCases parser cases = Parser $ \ ps -> cases $ parseWith parser ps
 
+parseCasesWithSource :: Parser s a -> ( ParseSource s -> ParseResult s a -> ParseResult s b ) -> Parser s b 
+parseCasesWithSource parser cases = Parser $ \ ps -> cases ps $ parseWith parser ps
 
 instance Functor (Parser s) where
     fmap f parser = parseCases parser c 
@@ -55,16 +57,13 @@ instance Monad (Parser s) where
 instance Alternative (Parser s) where
     empty = Parser $ \ ps -> Failure 
 
-    parser1 <|> parser2 = Parser $ 
-        \ ps -> 
-            case parseWith parser1 ps 
-            of
-                Success a ps' -> Success a ps'
-                Failure -> 
-                    case parseWith parser2 ps
-                    of
-                        Success a ps' -> Success a ps'
-                        Failure -> Failure 
+    parser1 <|> parser2 = parseCasesWithSource parser1 couter
+    
+        where cinner (Success a ps) = Success a ps
+              cinner Failure = Failure
+
+              couter _ (Success a ps) = Success a ps
+              couter ps Failure = parseWith (parseCases parser2 cinner) ps
 
     many parser = Parser $ 
         \ ps -> 
