@@ -156,5 +156,8 @@ parseUntil pa pb = checkForPb <|> getPas
           fromMaybe (Just a) = a
           fromMaybe Nothing = []
 
+parseTerminal :: Eq a => a -> b -> Parser [a] b
+parseTerminal target result = getAnyX (target ==) (const result)
+
 assert False = Parser $ \ ps -> Failure
 assert True = Parser $ \ ps -> Success () ps
