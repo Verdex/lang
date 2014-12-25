@@ -58,13 +58,11 @@ instance Monad (Parser s) where
 instance Alternative (Parser s) where
     empty = Parser $ \ ps -> Failure 
 
-    parser1 <|> parser2 = parseCasesWithSource parser1 couter
-    
-        where cinner (Success a ps) = Success a ps
-              cinner Failure = Failure
+    parser1 <|> parser2 = Parser $ \ ps -> (tryAgainOnFailure ps) $ parseWith parser1 ps
 
-              couter _ (Success a ps) = Success a ps
-              couter ps Failure = parseWith (parseCases parser2 cinner) ps
+        where tryAgainOnFailure ps Failure = parseWith parser2 ps
+              tryAgainOnFailrue _ s@(Success a ps) = s 
+    
 
     many parser = Parser $ 
         \ ps -> 
