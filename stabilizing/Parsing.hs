@@ -20,6 +20,8 @@ data Parser s a = Parser (ParseSource s -> ParseResult s a)
 
 parseWith (Parser p) = p
 
+
+
 parseCases :: Parser s a -> ( ParseResult s a -> ParseResult s b ) -> Parser s b 
 parseCases parser cases = Parser $ \ ps -> cases $ parseWith parser ps
 
@@ -27,31 +29,30 @@ parseCasesWithSource :: Parser s a -> ( ParseSource s -> ParseResult s a -> Pars
 parseCasesWithSource parser cases = Parser $ \ ps -> cases ps $ parseWith parser ps
 
 instance Functor (Parser s) where
-    fmap f parser = parseCases parser c 
-
-        where c (Success a ps) = Success (f a) ps 
-              c Failure = Failure
+    fmap f parser = Parser $ \ ps -> handleResult $ parseWith parser ps
+    
+        where handleResult (Success a ps) = Success (f a) ps 
+              handleResult Failure = Failure
 
 
 instance Applicative (Parser s) where
     pure a = Parser $ \ ps -> Success a ps
     
-    parser1 <*> parser2 = parseCases parser1 couter 
-
-        where couter (Success f ps) = parseWith (parseCases parser2 (cinner f)) ps
-              couter Failure = Failure 
-
-              cinner f (Success a ps) = Success (f a) ps
-              cinner _ Failure = Failure
+    parser1 <*> parser2 = 
+        do
+            f <- parser1
+            a <- parser2
+            return $ f a
 
 
 instance Monad (Parser s) where
     return = pure
 
-    parser >>= gen = parseCases parser c
-
-        where c (Success a ps) = parseWith (gen a) ps
-              c Failure = Failure
+    parser >>= gen = mu $ fmap gen parser
+    
+        where mu parser = Parser $ \ ps -> inner $ parseWith parser ps
+              inner (Success p ps) = parseWith p ps
+              inner Failure = Failure
 
 
 instance Alternative (Parser s) where
