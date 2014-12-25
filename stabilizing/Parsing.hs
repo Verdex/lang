@@ -21,13 +21,6 @@ data Parser s a = Parser (ParseSource s -> ParseResult s a)
 parseWith (Parser p) = p
 
 
-
-parseCases :: Parser s a -> ( ParseResult s a -> ParseResult s b ) -> Parser s b 
-parseCases parser cases = Parser $ \ ps -> cases $ parseWith parser ps
-
-parseCasesWithSource :: Parser s a -> ( ParseSource s -> ParseResult s a -> ParseResult s b ) -> Parser s b 
-parseCasesWithSource parser cases = Parser $ \ ps -> cases ps $ parseWith parser ps
-
 instance Functor (Parser s) where
     fmap f parser = Parser $ \ ps -> handleResult $ parseWith parser ps
     
