@@ -1,10 +1,10 @@
 
-module Tokenizer where
+module Tokenizer (tokenize) where
 
--- TODO only export tokenize
 
 import Control.Applicative
 import Data.List
+import Data.Char
 import Parsing
 import LangAst
 
@@ -21,45 +21,41 @@ tokenize str =
           reduce = foldl' (++) []
 
           mapReduce = reduce . (map convert)
+          
 
 allTokens =
     do
         ts <- many $ squashSpaces
                   <|> squashNewLine  
                   <|> squashComment
-                  <|> (getSimple "_" LangAst.Underscore)
-                  <|> (getSimple "match" LangAst.Match)
-                  <|> (getSimple "with" LangAst.With)
-                  <|> (getSimple "let" LangAst.Let)
-                  <|> (getSimple "in" LangAst.In)
-                  <|> (getSimple "end" LangAst.End)
-                  <|> (getSimple "=" LangAst.Assign)
-                  <|> (getSimple "\\" LangAst.Lambda)
-                  <|> (getSimple "->" LangAst.RArrow)
-                  <|> (getSimple ":" LangAst.Colon)
-                  <|> (getSimple ";" LangAst.Semicolon)
-                  <|> (getSimple "(" LangAst.LParen)
-                  <|> (getSimple ")" LangAst.RParen)
-                  <|> (getSimple "|" LangAst.OrBar)
-                  <|> (getSimple "data" LangAst.Data)
-                  <|> getSymbol
+                  <|> "_"     `strToTok` LangAst.Underscore
+                  <|> "match" `strToTok` LangAst.Match
+                  <|> "with"  `strToTok` LangAst.With
+                  <|> "let"   `strToTok` LangAst.Let
+                  <|> "in"    `strToTok` LangAst.In
+                  <|> "end"   `strToTok` LangAst.End
+                  <|> "="     `strToTok` LangAst.Assign
+                  <|> "\\"    `strToTok` LangAst.Lambda
+                  <|> "->"    `strToTok` LangAst.RArrow
+                  <|> ":"     `strToTok` LangAst.Colon
+                  <|> ";"     `strToTok` LangAst.Semicolon
+                  <|> "("     `strToTok` LangAst.LParen
+                  <|> ")"     `strToTok` LangAst.RParen
+                  <|> "|"     `strToTok` LangAst.OrBar
+                  <|> "data"  `strToTok` LangAst.Data
+                  <|> symbol
         end
         return ts
 
 
-getSymbol = fmap (Just . LangAst.Symbol) $ some getAnyAlpha
+symbol :: Parser String (Maybe Token)
+symbol = fmap (Just . LangAst.Symbol) $ some (isLetter ?=> id) 
 
-getSimple :: String -> Token -> Parser String (Maybe Token)
-getSimple s t =
-    do 
-        getString s
-        return $ Just t
+strToTok :: String -> Token -> Parser String (Maybe Token)
+strToTok s t = fmap Just $ s `stringBecomes` t
 
 squashSimple :: String -> Parser String (Maybe Token)
-squashSimple s = 
-    do
-        getString s
-        return Nothing 
+squashSimple s = fmap (const Nothing) $ s `stringBecomes` () 
 
 squashNewLine :: Parser String (Maybe Token)
 squashNewLine = (squashSimple "\r\n") <|> (squashSimple "\r") <|> (squashSimple "\n")
@@ -69,6 +65,7 @@ squashSpaces = squashSimple " "
 
 squashComment = 
     do
-        getString "--"
-        parseUntil (getAnyX (const True) (const ())) squashNewLine
+        "--" `stringBecomes` ()
+        -- This line says parse everything and destroy until we hit a new line.
+        ((const True) ?=> (const ())) `parseUntil` squashNewLine
         return Nothing
