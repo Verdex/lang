@@ -22,19 +22,14 @@ data Token = Symbol String
 data Program = Program [TopLevel]
     deriving (Show, Eq)
 
-data TopLevel = Define Def 
+data TopLevel = Define ValueDef 
               | TypeDefine TypeDef 
     deriving (Show, Eq)
 
-data Pattern = Pattern { p_cons :: String
-                       , p_param :: [Pattern]
+data Pattern = Pattern { pattern_cons :: String
+                       , pattern_param :: [Pattern]
                        }
              | DestructVariable String
-    deriving (Show, Eq)
-
-data MatchExpr = MatchExpr { m_target :: Expr
-                           , m_case :: [(Pattern, Expr)]
-                           }
     deriving (Show, Eq)
 
 data Expr = EVar String
@@ -47,22 +42,24 @@ data Expr = EVar String
                  , abs_body :: Expr
                  }
           | EApp Expr Expr
-          | EMat MatchExpr 
-    deriving (Show, Eq)
-
-data Def = Def { d_name :: String
-               , d_expr :: Expr
-               , d_sig :: TypeSig
-               }
-    deriving (Show, Eq)
-
-data Cons = Cons { c_name :: String
-                 , c_params :: [TypeSig]
+          | EMat { match_target :: Expr
+                 , match_case :: [(Pattern, Expr)]
                  }
     deriving (Show, Eq)
 
-data TypeDef = TypeDef { td_name :: String
-                       , td_cons :: [Cons]
+data ValueDef = ValueDef { valuedef_name :: String
+                         , valuedef_expr :: Expr
+                         , valuedef_sig :: TypeSig
+                         }
+    deriving (Show, Eq)
+
+data Cons = Cons { cons_name :: String
+                 , cons_params :: [TypeSig]
+                 }
+    deriving (Show, Eq)
+
+data TypeDef = TypeDef { typedef_name :: String
+                       , typedef_cons :: [Cons]
                        }
     deriving (Show, Eq)
 
