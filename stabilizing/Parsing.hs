@@ -56,17 +56,13 @@ instance Alternative (Parser s) where
         where tryAgainOnFailure ps Failure = parseWith parser2 ps
               tryAgainOnFailrue _ s@(Success a ps) = s 
     
+    many parser = Parser $ \ ps -> initialParse ps $ parseWith parser ps 
 
-    many parser = Parser $ 
-        \ ps -> 
-            case parseWith parser ps 
-            of
-                Failure -> Success [] ps
-                Success a ps' -> 
-                    case parseWith (many parser) ps' 
-                    of
-                        Failure -> Success [a] ps'
-                        Success as ps'' -> Success (a : as) ps''
+        where initialParse ps Failure = Success [] ps
+              initialParse _ (Success a ps) = subsequentParse ps a $ parseWith (many parser) ps 
+
+              subsequentParse ps a Failure = Success [a] ps
+              subsequentParse _ a (Success as ps) = Success (a : as) ps
 
     some parser = 
         do
@@ -75,12 +71,14 @@ instance Alternative (Parser s) where
             return (a : as)
 
 
-end = Parser $ 
-    \ ps@(i, s) -> 
-        case i == length s 
-        of
-            True -> Success () ps
-            False -> Failure
+-- Ensures that you have reached the end of the input being parsed.
+end :: Parser [s] ()
+end = Parser $ \ ps@(i, s) -> 
+    if i == length s then
+        Success () ps
+    else
+        Failure
+
 
 getAnyX matcher transform = Parser $
     \ (i,s) -> 
