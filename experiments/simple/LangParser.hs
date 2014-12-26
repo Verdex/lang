@@ -13,17 +13,17 @@ parse = undefined
 
 
 pTypeDef :: Parser [Token] TypeDef 
-pTypeDef =
-    do
+pTypeDef = undefined
+   {- do
         pSimple Data
         typeName <- pAnySymbol
         pSimple Assign
         
-        -- get many cons + param until ; (and | in between)
+        --get many cons + param until ; (and | in between)
         return $ TypeDef { td_name = typeName
                          , td_cons = []
                          }   
- 
+-} 
  -- data x = x ;
  -- data x = y ;
  -- data x = y | z ;
@@ -37,28 +37,34 @@ pTypeDef =
  -- data x = y (a -> b) ;
  -- data x = y (a -> b) c | z d ;
 
- -- TODO will need type sig parser so I can get arbitrary types of constructor parameters parsed
 
-pTypeSig :: Parser [Token] TypeSig
-pTypeSig =
-    do
+typeSig :: Parser [Token] TypeSig
+typeSig = arrow <|> paren <|> tsym 
 
--- x 
--- x -> x
--- ( x )
--- (x -> x) -> x -> x
+    where tsym = 
+            do
+                name <- anySymbol
+                return $ TSingle name
+          arrow = 
+            do 
+                a <- paren <|> tsym 
+                literally LangAst.RArrow ()
+                b <- typeSig
+                return $ TArrow a b
+
+          paren =
+            do
+                literally LangAst.LParen ()
+                t <- typeSig
+                literally LangAst.RParen ()
+                return t
 
 
-pAnySymbol :: Parser [Token] String
-pAnySymbol = getAnyX matchSymbol projSymbol
+anySymbol :: Parser [Token] String
+anySymbol = matchSymbol ?=> projSymbol
 
-    where matchSymbol t = case t 
-                          of
-                              Symbol _ -> True
-                              _ -> False
-
+    where matchSymbol (Symbol _) = True
+          matchSymbol _ = False
           projSymbol (Symbol n) = n
 
-pSimple :: Token -> Parser [Token] () 
-pSimple tok = getAnyX (\ v -> v == tok) (const ())
 
