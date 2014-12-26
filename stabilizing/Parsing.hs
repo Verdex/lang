@@ -2,7 +2,6 @@
 module Parsing where
 
 import Control.Applicative
-import Data.Char
 
 
 type ParseSource a = (Int, a)
@@ -79,34 +78,36 @@ end = Parser $ \ ps@(i, s) ->
     else
         Failure
 
-
-getAnyX matcher transform = Parser $
-    \ (i,s) -> 
-        case i >= length s
-        of
-            True -> Failure 
-            False -> 
-                let x = s !! i 
-                in
-                    case matcher x 
-                    of
-                        True -> Success (transform x) (i+1, s)
-                        False -> Failure
-
-
-getAnyDigit = getAnyX isDigit digitToInt
-
-getAnyAlpha = getAnyX isLetter id 
-
-getString str = Parser $
-    \ (i,s) -> 
-        let len = length str 
+-- If the matcher indicate a match then we use the
+-- transformer to convert the value into a result.
+-- The value is consumed.
+(?=>) :: (a -> Bool) -> (a -> b) -> Parser [a] b
+(?=>) matcher transform = Parser $ \ (i,s) -> 
+    if i >= length s then
+        Failure
+    else 
+        let x = s !! i 
         in
-            case str == take len (drop i s)
-            of
-                True -> Success str (i+len,s)
-                False -> Failure
+            if matcher x then
+                Success (transform x) (i+1, s)
+            else
+                Failure
 
+literally :: Eq a => a -> b -> Parser [a] b
+literally target result = (target ==) ?=> (const result)
+
+-- Parses a string and then produces some result.
+stringBecomes :: String -> a -> Parser String a
+stringBecomes str result = Parser $ \ (i,s) -> 
+    let len = length str 
+    in
+        if str == take len (drop i s) then
+            Success result (i+len, s)
+        else
+            Failure
+
+-- Does not consume input for successful parse.
+lookAhead :: Parser s a -> Parser s a
 lookAhead parser = Parser $ 
     \ ps -> 
         case parseWith parser ps
@@ -114,6 +115,7 @@ lookAhead parser = Parser $
             Success a ps' -> Success a ps
             f@Failure -> f
 
+-- Will successfully parse zero or one instance.
 zeroOrOne :: Parser s a -> Parser s (Maybe a)
 zeroOrOne parser = Parser $ 
     \ ps -> 
@@ -122,7 +124,7 @@ zeroOrOne parser = Parser $
             Success a ps' -> Success (Just a) ps'
             Failure -> Success Nothing ps
             
--- Parses 'a' until a 'b' is encountered or a non 'a'
+-- Parses 'a' until a 'b' or non 'a' is encountered
 -- non 'a' is not consumed, 'b' is not consumed
 -- may return a zero length list
 parseUntil :: Parser s a -> Parser s b -> Parser s [a]
@@ -138,9 +140,7 @@ parseUntil pa pb = checkForPb <|> getPas
           fromMaybe (Just a) = a
           fromMaybe Nothing = []
 
-parseTerminal :: Eq a => a -> b -> Parser [a] b
-parseTerminal target result = getAnyX (target ==) (const result)
-
+assert :: Bool -> Parser s ()
 assert False = Parser $ \ ps -> Failure
 assert True = Parser $ \ ps -> Success () ps
 
