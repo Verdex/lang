@@ -14,16 +14,6 @@ parse = undefined
 
 pTypeDef :: Parser [Token] TypeDef 
 pTypeDef = undefined
-   {- do
-        pSimple Data
-        typeName <- pAnySymbol
-        pSimple Assign
-        
-        --get many cons + param until ; (and | in between)
-        return $ TypeDef { td_name = typeName
-                         , td_cons = []
-                         }   
--} 
  -- data x = x ;
  -- data x = y ;
  -- data x = y | z ;
