@@ -53,7 +53,7 @@ instance Alternative (Parser s) where
     parser1 <|> parser2 = Parser $ \ ps -> (tryAgainOnFailure ps) $ parseWith parser1 ps
 
         where tryAgainOnFailure ps Failure = parseWith parser2 ps
-              tryAgainOnFailrue _ s@(Success a ps) = s 
+              tryAgainOnFailure _ s@(Success a ps) = s 
     
     many parser = Parser $ \ ps -> initialParse ps $ parseWith parser ps 
 
