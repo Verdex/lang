@@ -12,8 +12,41 @@ parse :: [Token] -> Program
 parse = undefined
 
 
-pTypeDef :: Parser [Token] TypeDef 
-pTypeDef = undefined
+typeDef :: Parser [Token] TypeDef 
+typeDef = 
+    do
+        literally LangAst.Data ()
+        name <- anySymbol
+        literally LangAst.Assign ()
+        cs <- consList
+        return $ TypeDef { typedef_name = name
+                         , typedef_cons = cs
+                         }
+
+    where consDef =
+            do
+                consName <- anySymbol
+                params <- many typeSig
+                return $ Cons { cons_name = consName
+                              , cons_params = params
+                              }
+          consListNode =
+            do
+                literally LangAst.OrBar ()
+                c <- consDef
+                return c
+
+          consList =
+            do
+                c <- zeroOrOne consDef
+                cs <- many consListNode
+                literally LangAst.Semicolon ()
+                return $ comb c cs
+
+          comb (Just c) cs = c : cs
+          comb Nothing cs = cs
+
+
  -- data x = x ;
  -- data x = y ;
  -- data x = y | z ;
