@@ -19,7 +19,7 @@ letExpr =
     do
         literally Let ()
         name <- anySymbol
-        literally Semicolon ()
+        literally Colon ()
         sig <- typeSig
         literally Assign ()
         assign <- expr
