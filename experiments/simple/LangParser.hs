@@ -11,13 +11,33 @@ import LangAst
 parse :: [Token] -> Program
 parse = undefined
 
+expr :: Parser [Token] Expr
+expr = fmap EVar anySymbol
+
+letExpr :: Parser [Token] Expr
+letExpr = 
+    do
+        literally Let ()
+        name <- anySymbol
+        literally Semicolon ()
+        sig <- typeSig
+        literally Assign ()
+        assign <- expr
+        literally In ()
+        body <- expr
+        return $ ELet { let_name = name
+                      , let_sig = sig
+                      , let_assign = assign
+                      , let_body = body
+                      }
+
 
 typeDef :: Parser [Token] TypeDef 
 typeDef = 
     do
-        literally LangAst.Data ()
+        literally Data ()
         name <- anySymbol
-        literally LangAst.Assign ()
+        literally Assign ()
         cs <- consList
         return $ TypeDef { typedef_name = name
                          , typedef_cons = cs
@@ -32,7 +52,7 @@ typeDef =
                               }
           consListNode =
             do
-                literally LangAst.OrBar ()
+                literally OrBar ()
                 c <- consDef
                 return c
 
@@ -40,25 +60,11 @@ typeDef =
             do
                 c <- zeroOrOne consDef
                 cs <- many consListNode
-                literally LangAst.Semicolon ()
+                literally Semicolon ()
                 return $ comb c cs
 
           comb (Just c) cs = c : cs
           comb Nothing cs = cs
-
-
- -- data x = x ;
- -- data x = y ;
- -- data x = y | z ;
- -- data x = y | z | w ;
- -- data x = y a ;
- -- data x = y a b ;
- -- data x = y a b c;
- -- data x = y x;
- -- data x = y a b | z a b c;
- -- data x = y a b | z a | w ;
- -- data x = y (a -> b) ;
- -- data x = y (a -> b) c | z d ;
 
 
 typeSig :: Parser [Token] TypeSig
@@ -71,15 +77,15 @@ typeSig = arrow <|> paren <|> tsym
           arrow = 
             do 
                 a <- paren <|> tsym 
-                literally LangAst.RArrow ()
+                literally RArrow ()
                 b <- typeSig
                 return $ TArrow a b
 
           paren =
             do
-                literally LangAst.LParen ()
+                literally LParen ()
                 t <- typeSig
-                literally LangAst.RParen ()
+                literally RParen ()
                 return t
 
 
