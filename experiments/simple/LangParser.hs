@@ -13,6 +13,10 @@ parse = undefined
 
 expr :: Parser [Token] Expr
 expr = fmap EVar anySymbol
+   <|> letExpr
+
+matchExpr :: Parser [Token] Expr
+matchExpr = undefined
 
 letExpr :: Parser [Token] Expr
 letExpr = 
