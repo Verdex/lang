@@ -14,9 +14,27 @@ parse = undefined
 expr :: Parser [Token] Expr
 expr = fmap EVar anySymbol
    <|> letExpr
+   <|> matchExpr
 
 matchExpr :: Parser [Token] Expr
-matchExpr = undefined 
+matchExpr =
+    do
+        literally Match ()
+        target <- expr
+        literally With ()
+        cases <- some _case
+        literally End ()
+        return $ EMat { match_target = target
+                      , match_cases = cases
+                      }
+
+    where _case = 
+            do
+                pat <- pattern
+                literally RArrow ()
+                e <- expr
+                literally Semicolon ()
+                return $ (pat, e)
 
 pattern :: Parser [Token] Pattern
 pattern = 
