@@ -40,7 +40,7 @@ data Expr = EVar String
                  }
           | EApp Expr Expr
           | EMat { match_target :: Expr
-                 , match_case :: [(Pattern, Expr)]
+                 , match_cases :: [(Pattern, Expr)]
                  }
     deriving (Show, Eq)
 
