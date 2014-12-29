@@ -27,9 +27,8 @@ data TopLevel = Define ValueDef
     deriving (Show, Eq)
 
 data Pattern = Pattern { pattern_cons :: String
-                       , pattern_param :: [Pattern]
+                       , pattern_params :: [Pattern]
                        }
-             | DestructVariable String
     deriving (Show, Eq)
 
 data Expr = EVar String
