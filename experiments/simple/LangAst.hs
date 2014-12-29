@@ -26,9 +26,7 @@ data TopLevel = Define ValueDef
               | TypeDefine TypeDef 
     deriving (Show, Eq)
 
-data Pattern = Pattern { pattern_cons :: String
-                       , pattern_params :: [Pattern]
-                       }
+data Pattern = Pattern String [Pattern]
     deriving (Show, Eq)
 
 data Expr = EVar String
