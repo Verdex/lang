@@ -33,9 +33,6 @@ pattern = pat <|> parenPat
                 literally RParen ()
                 return p
 
-
--- Cons a (Cons NIL as)
-
 matchExpr :: Parser [Token] Expr
 matchExpr = undefined
 
