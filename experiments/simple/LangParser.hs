@@ -15,6 +15,27 @@ expr :: Parser [Token] Expr
 expr = fmap EVar anySymbol
    <|> letExpr
 
+pattern :: Parser [Token] Pattern
+pattern = pat <|> parenPat
+
+    where pat = 
+            do
+                consName <- anySymbol
+                innerPatterns <- many pattern 
+                return $ Pattern { pattern_cons = consName 
+                                 , pattern_params = innerPatterns 
+                                 }   
+
+          parenPat =
+            do
+                literally LParen ()
+                p <- pat
+                literally RParen ()
+                return p
+
+
+-- Cons a (Cons NIL as)
+
 matchExpr :: Parser [Token] Expr
 matchExpr = undefined
 
