@@ -20,6 +20,7 @@ data Token = Symbol String
     deriving (Show, Eq)
 
 data Program = Program [TopLevel]
+             | ParseError
     deriving (Show, Eq)
 
 data TopLevel = Define ValueDef 
