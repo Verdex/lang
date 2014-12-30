@@ -15,6 +15,18 @@ expr :: Parser [Token] Expr
 expr = fmap EVar anySymbol
    <|> letExpr
    <|> matchExpr
+   <|> abstraction
+
+abstraction :: Parser [Token] Expr
+abstraction =
+    do
+        literally Lambda ()
+        params <- many anySymbol
+        literally RArrow ()
+        body <- expr
+        return $ EAbs { abs_params = params
+                      , abs_body = body
+                      }
 
 matchExpr :: Parser [Token] Expr
 matchExpr =
