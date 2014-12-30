@@ -11,11 +11,43 @@ import LangAst
 parse :: [Token] -> Program
 parse = undefined
 
+-- NOTE:  Application needs to come before variable in order for "a (b c)" that case to 
+-- parse correctly.  Because <|> is an ordered choice, if variable comes first then
+-- we will consume the 'b' as a variable instead of the first expr in an application.
 expr :: Parser [Token] Expr
-expr = fmap EVar anySymbol
+expr = application
+   <|> variable 
+   <|> parenExpr
    <|> letExpr
    <|> matchExpr
    <|> abstraction
+   
+parenExpr :: Parser [Token] Expr
+parenExpr =
+    do
+        literally LParen ()
+        e <- expr
+        literally RParen ()
+        return e
+
+variable :: Parser [Token] Expr
+variable = fmap EVar anySymbol
+
+application :: Parser [Token] Expr
+application = 
+    do
+        e <- allButApp
+        es <- some allButApp
+        return $ buildApp e es
+
+    where allButApp = variable 
+                  <|> parenExpr
+                  <|> letExpr 
+                  <|> matchExpr 
+                  <|> abstraction
+
+          buildApp e1 (e2 : []) = EApp e1 e2
+          buildApp e1 (e2 : es) = buildApp (EApp e1 e2) es
 
 abstraction :: Parser [Token] Expr
 abstraction =
