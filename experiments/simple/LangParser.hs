@@ -1,7 +1,6 @@
 
-module LangParser where
+module LangParser (parse) where
 
--- TODO only export parse
 
 import Control.Applicative
 import Parsing
@@ -9,7 +8,38 @@ import LangAst
 
 
 parse :: [Token] -> Program
-parse = undefined
+parse = (m . (parseWith program) . makeParseSource)
+    where m (Success p _) = p
+          m Failure = ParseError 
+
+
+program :: Parser [Token] Program
+program =
+    do
+        tls <-  many topLevel
+        end
+        return $ Program tls
+
+
+topLevel :: Parser [Token] TopLevel
+topLevel = fmap Define valueDef
+       <|> fmap TypeDefine typeDef
+
+
+valueDef :: Parser [Token] ValueDef
+valueDef =
+    do
+        name <- anySymbol
+        literally Colon ()
+        sig <- typeSig
+        literally Assign ()
+        e <- expr
+        literally Semicolon ()
+        return $ ValueDef { valuedef_name = name
+                          , valuedef_sig = sig
+                          , valuedef_expr = e
+                          }
+
 
 -- NOTE:  Application needs to come before variable in order for "a (b c)" that case to 
 -- parse correctly.  Because <|> is an ordered choice, if variable comes first then
