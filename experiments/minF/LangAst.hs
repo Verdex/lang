@@ -24,7 +24,6 @@ data TopLevel = Define ValueDef
 data Expr = EVar String
           | EAbs [String] Expr
           | EApp Expr Expr
-          | Undefined
     deriving (Show, Eq)
 
 data ValueSig = ValueSig String TypeSig
