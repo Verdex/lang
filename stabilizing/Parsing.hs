@@ -78,7 +78,7 @@ end = Parser $ \ ps@(i, s) ->
     else
         Failure
 
--- If the matcher indicate a match then we use the
+-- If the matcher indicates a match then we use the
 -- transformer to convert the value into a result.
 -- The value is consumed.
 (?=>) :: (a -> Bool) -> (a -> b) -> Parser [a] b
