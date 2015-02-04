@@ -10,6 +10,16 @@ import LangAst
 parse :: [Token] -> Program
 parse = undefined
 
+
+typeDef :: Parser [Token] TypeDef
+typeDef =
+    do
+        literally Type ()
+        typeName <- anySymbol
+        typeParams <- many anySymbol
+        return $ TypeDef typeName typeParams
+
+
 expr :: Parser [Token] Expr
 expr = application
    <|> variable 
