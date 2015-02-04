@@ -36,6 +36,6 @@ data TypeDef = TypeDef String [String]
     deriving (Show, Eq)
 
 data TypeSig = TSingle String
-             | TypeApp String [TypeSig]
+             | TypeApp TypeSig TypeSig
              | TArrow TypeSig TypeSig 
     deriving (Show, Eq)

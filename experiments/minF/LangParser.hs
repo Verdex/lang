@@ -19,7 +19,6 @@ typeDef =
         typeParams <- many anySymbol
         return $ TypeDef typeName typeParams
 
-
 expr :: Parser [Token] Expr
 expr = application
    <|> variable 
