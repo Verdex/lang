@@ -6,7 +6,6 @@ import Control.Applicative
 import Parsing
 import LangAst
 
--- left recursion problems exist because of the relationship between typesig and typeapp
 
 parse :: [Token] -> Program
 parse = undefined
@@ -31,13 +30,12 @@ parenType =
 typeApp :: Parser [Token] TypeSig
 typeApp =
     do
-        t <- allButApp
-        ts <- some allButApp
+        t <- varAndParen 
+        ts <- some varAndParen 
         return $ build t ts
 
-    where allButApp = typeVar 
+    where varAndParen = typeVar 
                   <|> parenType
-                  -- <|> typeArrow 
 
           build t1 (t2 : []) = TApp t1 t2
           build t1 (t2 : ts) = build (TApp t1 t2) ts
@@ -50,9 +48,9 @@ typeArrow =
         t2 <- typeSig 
         return $ TArrow t1 t2
 
-    where allButArrow = typeVar 
+    where allButArrow = typeApp
+                    <|> typeVar 
                     <|> parenType
-                    <|> typeApp
 
 typeDef :: Parser [Token] TypeDef
 typeDef =
