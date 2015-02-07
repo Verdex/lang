@@ -13,7 +13,11 @@ parse tokens = case parseWith program (makeParseSource tokens) of
                     Failure -> ParseError
 
 program :: Parser [Token] Program
-program = fmap Program $ many topLevel
+program = 
+    do
+        prog <- fmap Program $ many topLevel
+        end
+        return prog
 
 topLevel :: Parser [Token] TopLevel
 topLevel = fmap Define valueDef
