@@ -8,7 +8,26 @@ import LangAst
 
 
 parse :: [Token] -> Program
-parse = undefined
+parse tokens = case parseWith program (makeParseSource tokens) of
+                    Success prog _ -> prog
+                    Failure -> ParseError
+
+program :: Parser [Token] Program
+program = fmap Program $ many topLevel
+
+topLevel :: Parser [Token] TopLevel
+topLevel = fmap Define valueDef
+        <|> fmap DefineSig valueSig
+        <|> fmap TypeDefine typeDef
+
+valueSig :: Parser [Token] ValueSig
+valueSig =
+    do
+        valueSig <- anySymbol
+        literally Colon ()
+        t <- typeSig 
+        literally Semicolon ()
+        return $ ValueSig valueSig t
 
 typeSig :: Parser [Token] TypeSig
 typeSig = typeArrow
@@ -58,7 +77,17 @@ typeDef =
         literally Type ()
         typeName <- anySymbol
         typeParams <- many anySymbol
+        literally Semicolon ()
         return $ TypeDef typeName typeParams
+
+valueDef :: Parser [Token] ValueDef
+valueDef =
+    do
+        valueName <- anySymbol
+        literally Assign ()
+        e <- expr
+        literally Semicolon ()
+        return $ ValueDef valueName e
 
 expr :: Parser [Token] Expr
 expr = application
