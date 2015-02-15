@@ -2,6 +2,7 @@
 
 module TypeCheck where
 
+import LangAst
 -- x : int
 -- blah : int
 -- blah = x 
@@ -38,17 +39,7 @@ module TypeCheck where
 --                    ( \ a -> a ) ( \ a -> a ) => app (forall a . a -> a) (forall a . a -> a)
 --                      although it looks like a sufficiently advanced lookup might be able to handle that
 
--- need some sort of type equivalence that handles forall
 
--- the existence of lookup makes me think this is going to involve state monad
 
-data Type = Variable String 
-          | Simple String
-          | Indexed String [Type] 
-          | Arrow Type Type
-          | Forall [String] Type
 
-instance Eq Type where
-    Simple n == Simple n' = n == n'
-    Indexed n ts == Indexed n' ts' = n == n' && ts == ts'
-    Arrow ta tb == Arrow ta' tb' = ta == ta' && tb == tb'
+
