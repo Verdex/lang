@@ -22,7 +22,7 @@ data TopLevel = Define ValueDef
     deriving (Show, Eq)
 
 data Expr = EVar String
-          | EAbs [String] Expr
+          | EAbs String Expr
           | EApp Expr Expr
     deriving (Show, Eq)
 

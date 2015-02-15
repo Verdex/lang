@@ -128,10 +128,10 @@ abstraction :: Parser [Token] Expr
 abstraction =
     do
         literally Lambda ()
-        params <- many anySymbol
+        param <- anySymbol
         literally RArrow ()
         body <- expr
-        return $ EAbs params body
+        return $ EAbs param body
 
 anySymbol :: Parser [Token] String
 anySymbol = matchSymbol ?=> projSymbol
