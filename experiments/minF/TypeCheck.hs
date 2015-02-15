@@ -43,7 +43,12 @@ module TypeCheck where
 -- the existence of lookup makes me think this is going to involve state monad
 
 data Type = Variable String 
-          | Single String
-          | App String [Type] 
+          | Simple String
+          | Indexed String [Type] 
           | Arrow Type Type
           | Forall [String] Type
+
+instance Eq Type where
+    Simple n == Simple n' = n == n'
+    Indexed n ts == Indexed n' ts' = n == n' && ts == ts'
+    Arrow ta tb == Arrow ta' tb' = ta == ta' && tb == tb'
