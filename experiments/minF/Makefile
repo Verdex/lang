@@ -1,4 +1,6 @@
 
+make :
+	ghc Main.hs
 
 clean : 
 	rm -rf *.o
