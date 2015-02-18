@@ -9,13 +9,17 @@ import LangAst
 type Env = [(String, Type)] 
 
 typeOf :: Env -> Expr -> Maybe Type
-typeOf env expr = typeOf' 0 env expr
+typeOf = typeOf' 0 
     where 
         typeOf' _ env (EVar name) =  lookup name env
 
         -- putting (n, Variable i) on the front of the list will allow
         -- expected lexical scoping (closer is used) to function automatically
-        typeOf' tVarI env (EAbs n e) = Forall tVarI <$> (typeOf' (tVarI+1) ((n, Variable tVarI) : env) e)
+
+        -- TODO I'm not sure that tVarI + 1 prevents all name collisions ... see if i can
+        -- get a bad type replacement (probably by using app such that both paths use the same
+        -- type that ends up in a sub type expression that gets incorrectly replaced by sub)
+        typeOf' tVarI env (EAbs n e) = (Forall tVarI . Arrow (Variable tVarI)) <$> (typeOf' (tVarI+1) ((n, Variable tVarI) : env) e)
 
         typeOf' tVarI env (EApp e1 e2) = 
             let t1 = typeOf' tVarI env e1 in
