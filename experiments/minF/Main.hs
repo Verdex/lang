@@ -16,13 +16,13 @@ infixl 0 |>
 
 -- TODO need to prefill environment from DefineSig
 -- TODO probably need to move this to typecheck
-computeTypes :: Program -> [(String,Maybe Type)]
-computeTypes ParseError = []
-computeTypes (Program tls) = map onlyValue tls 
+computeTypes :: (Env -> Expr -> Maybe Type) -> Program -> [(String,Maybe Type)]
+computeTypes _ ParseError = []
+computeTypes to (Program tls) = map onlyValue tls 
                                 -- Personally I think this line looks cool, but map mToL |> concat should go first
                                 -- so that I don't need the <$> (although having <$> along for the ride does make
                                 -- me feel safer)
-                              |> map ((\ (ValueDef n e) -> (n, typeOf [] e)) <$>)
+                              |> map ((\ (ValueDef n e) -> (n, to [] e)) <$>)
                               |> map mToL 
                               |> concat 
 
@@ -41,5 +41,5 @@ main =
         --putStrLn $ show toks
         prog <- pure $ parse toks
         --putStrLn $ show prog 
-        types <- pure $ computeTypes prog
+        types <- pure $ computeTypes typeOf prog
         putStrLn $ show types
