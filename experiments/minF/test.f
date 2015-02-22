@@ -1,16 +1,16 @@
 
 
-program : a -> b;
+-- program : a -> b;
 
-bind : m a -> ( a -> m b ) -> m b;
-bind = \ a -> \ gen -> gen ( unwrap a );
+-- bind : m a -> ( a -> m b ) -> m b;
+-- bind = \ a -> \ gen -> gen ( unwrap a );
 
-blah = (\ a -> \ b -> a) A B;
+-- blah = (\ a -> \ b -> a) A B;
 
-s = (\ a -> \ b -> a); 
+-- s = (\ a -> \ b -> a); 
 
-j = (\ a -> \ b -> a) (\ a -> a);
+-- j = (\ a -> \ b -> a) (\ a -> a);
 
-c = (\ a -> \ b -> a) (\ a -> \ b -> a) (\ a -> a);
+-- c = (\ a -> \ b -> a) (\ a -> \ b -> a) (\ a -> a);
 
-d = (\ a -> \ b -> a b);
+-- d = (\ a -> \ b -> a b);
