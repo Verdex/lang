@@ -40,11 +40,11 @@ data TypeSig = TSingle String
              | TArrow TypeSig TypeSig 
     deriving (Show, Eq)
 
-data Type = Variable Int 
+data Type = Variable Integer
           | Simple String
           | Indexed String [Type] 
           | Arrow Type Type
-          | Forall Int Type
+          | Forall Integer Type
     deriving Show
 
 -- I'm not sure if my Variable and Forall equality is correct
