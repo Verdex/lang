@@ -13,5 +13,6 @@ data Type = Simple String
     deriving Show
 
 
+-- add environment? (  [(String, Type)] ... lookup is str -> type )
 typeOf :: Expr -> Maybe Type
 typeOf = undefined
