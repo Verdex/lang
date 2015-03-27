@@ -32,6 +32,7 @@ typeOf env expr = evalState (typeOf' env expr) 0
                 t2 <- typeOf' env e2
                 return $ mu (apply <$> t1 <*> t2)
 
+
 apply :: Type -> Type -> Maybe Type
 apply (TSimple _) _ = Nothing
 apply (TVar _) _ = Nothing -- wrong (\ a -> \ b -> a b) ... we need to assign 'a' to Arrow (Var b) ? and then unify it with whatever 'a' ends up being in some later step?
@@ -40,6 +41,13 @@ apply (TArrow inputType outputType) inputType'
     | inputType == inputType' = Just outputType
     | otherwise = Nothing
 
+containsTypeVar :: Type -> Bool
+containsTypeVar (TSimple _) = False
+containsTypeVar (TVar _) = True
+containsTypeVar (TArrow t1 t2) = (containsTypeVar t1) || (containsTypeVar t2)
+
+unify :: Type -> Type -> Maybe Type
+unify = undefined
 
 substitute :: Integer -> Type -> Type -> Type
 substitute replaceThis withThis inThis =
