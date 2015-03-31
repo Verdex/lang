@@ -18,6 +18,9 @@ proj (State f) = f
 evalState :: State s a -> s -> a
 evalState u s = let (_, r) = proj u s in r
 
+getState :: State s s
+getState = State $ \ s -> (s, s)
+
 instance Functor (State s) where
     fmap f a = State $ \ s -> let (s', r) = proj a s in (s', f r)
 
