@@ -37,7 +37,12 @@ finalMState ms init = hr $ proj ms init
     where hr (Success s a) = Just s
           hr Failure = Nothing
 
--- need get and set
+getState :: MState s s
+getState = MState $ \ s -> Success s s
+
+setState :: s -> MState s ()
+setState s = MState $ \ s' -> Success s () 
+
 
 data Term = Constant String
           | Variable Integer
@@ -45,6 +50,18 @@ data Term = Constant String
     deriving Show
 
 type Env = [(Integer, Term)]
+
+addToEnv :: Integer -> Term -> MState Env ()
+addToEnv i t = 
+    do
+        env <- getState
+        setState $ (i, t) : env
+
+checkEnv :: Integer -> MState Env (Maybe Term)
+checkEnv i = 
+    do
+        env <- getState
+        return $ lookup i env
 
 unify :: Env -> Term -> Term -> Maybe Env
 unify env (Constant x) (Constant y) = if x == y then Just env else Nothing
