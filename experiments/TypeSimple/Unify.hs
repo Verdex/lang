@@ -64,21 +64,14 @@ checkEnv i =
         return $ lookup i env
 
 unify :: Env -> Term -> Term -> Maybe Env
-unify env (Constant x) (Constant y) = if x == y then Just env else Nothing
-unify env (Function n1 ts1) (Function n2 ts2) = if n1 == n2 && (length ts1) == (length ts2) 
-                                                then Nothing 
-                                                else Nothing
-    --where unifyChildren env (t1:ts1) (t2:ts2) = unify
+unify env t1 t2 = finalMState (unify' t1 t2) env
 
-unify' :: Env -> Term -> Term -> Maybe Env
-unify' env t1 t2 = finalMState (unify'' t1 t2) env
-
-unify'' :: Term -> Term -> MState Env () 
-unify'' (Constant x) (Constant y) = 
+unify' :: Term -> Term -> MState Env () 
+unify' (Constant x) (Constant y) = 
     if x == y then success ()
               else failure 
 
-unify'' (Function n1 ts1) (Function n2 ts2) = 
+unify' (Function n1 ts1) (Function n2 ts2) = 
     if n1 == n2 && (length ts1) == (length ts2)
     then 
         do 
@@ -88,10 +81,10 @@ unify'' (Function n1 ts1) (Function n2 ts2) =
     where unifyAll [] [] = pure ()
           unifyAll (t1:ts1) (t2:ts2) =
             do
-                unify'' t1 t2
+                unify' t1 t2
                 unifyAll ts1 ts2 
 
-unify'' a@(Variable ai) b@(Variable bi) 
+unify' a@(Variable ai) b@(Variable bi) 
     | ai == bi = success ()
     | otherwise = do
                     aEnv <- checkEnv ai
@@ -104,5 +97,21 @@ unify'' a@(Variable ai) b@(Variable bi)
                         -- assign B's term to A
                         (Nothing, Just bt) -> do { addToEnv ai bt }
                         -- unify A's term with B's term
-                        (Just at, Just bt) -> unify'' at bt
+                        (Just at, Just bt) -> if at == b || bt == a then success () else unify' at bt
+
+unify' a@(Variable ai) t
+    | a ?-> t = failure
+    | otherwise = do
+                      menv <- checkEnv ai
+                      case menv of
+                          Nothing -> do { addToEnv ai t }
+                          Just t' -> unify' t t'
+
+unify' t a@(Variable _) = unify' a t
+
+occurs a@(Variable _) b@(Variable _) = a == b
+occurs (Variable _) (Constant _) = False
+occurs a@(Variable _) (Function _ ts) = all (occurs a) ts
+
+(?->) a t = occurs a t
 
