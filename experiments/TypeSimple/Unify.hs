@@ -47,7 +47,7 @@ setState s = MState $ \ s' -> Success s ()
 data Term = Constant String
           | Variable Integer
           | Function String [Term]
-    deriving Show
+    deriving (Show, Eq)
 
 type Env = [(Integer, Term)]
 
@@ -91,17 +91,18 @@ unify'' (Function n1 ts1) (Function n2 ts2) =
                 unify'' t1 t2
                 unifyAll ts1 ts2 
 
-unify'' a@(Variable ai) b@(Variable bi) = 
-    do
-        aEnv <- checkEnv ai
-        bEnv <- checkEnv bi
-        case (aEnv, bEnv) of
-            -- Both are uninitialized
-            (Nothing, Nothing) -> do { addToEnv ai b; addToEnv bi a }
-            -- assign A's term to B
-            (Just at, Nothing) -> do { addToEnv bi at }
-            -- assign B's term to A
-            (Nothing, Just bt) -> do { addToEnv ai bt }
-            -- unify A's term with B's term
-            (Just at, Just bt) -> unify'' at bt
+unify'' a@(Variable ai) b@(Variable bi) 
+    | ai == bi = success ()
+    | otherwise = do
+                    aEnv <- checkEnv ai
+                    bEnv <- checkEnv bi
+                    case (aEnv, bEnv) of
+                        -- Both are uninitialized
+                        (Nothing, Nothing) -> do { addToEnv ai b; addToEnv bi a }
+                        -- assign A's term to B
+                        (Just at, Nothing) -> do { addToEnv bi at }
+                        -- assign B's term to A
+                        (Nothing, Just bt) -> do { addToEnv ai bt }
+                        -- unify A's term with B's term
+                        (Just at, Just bt) -> unify'' at bt
 
