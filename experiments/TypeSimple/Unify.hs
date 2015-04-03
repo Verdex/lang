@@ -116,7 +116,7 @@ unify' t a@(Variable _) = unify' a t
 
 occurs a@(Variable _) b@(Variable _) = a == b
 occurs (Variable _) (Constant _) = False
-occurs a@(Variable _) (Function _ ts) = all (occurs a) ts
+occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
 (?->) a t = occurs a t
 

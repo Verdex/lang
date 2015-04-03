@@ -75,6 +75,9 @@ main =
         test (unify [] (Variable 1) 
                        (Constant "a"), contains (1, Constant "a"), "variable unifies with constant")
 
+        test (unify [] (Variable 1)
+                       (Function "a" []), contains (1, Function "a" []), "variable unifies with 0 arity function")
+
 
 m = unify [(1, Constant "blah")] (Variable 1) 
                                   (Variable 2)
