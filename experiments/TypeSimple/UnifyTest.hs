@@ -1,39 +1,51 @@
 
 import Unify
 
+works (Just _) = True
+works _ = False
+fails Nothing = True
+fails (Just _) = False
 
-a = unify' [] (Constant "a") 
-              (Constant "b")
+test :: (Maybe Env, (Maybe Env -> Bool), String) -> IO ()
+test (result, test, name) 
+    | test result = print ("Pass: " ++ name)
+    | otherwise = print ("Fail: " ++ name)
 
-b = unify' [] (Constant "a") 
-              (Constant "a")
 
-c = unify' [] (Function "a" []) 
-              (Function "b" [])
+main = 
+    do
+        test (unify' [] (Constant "a") 
+                        (Constant "b"), fails, "constant mismatch")
+    
+        test (unify' [] (Constant "a") 
+                        (Constant "a"), works, "constant match")
 
-d = unify' [] (Function "a" []) 
-              (Function "a" [])
+        test (unify' [] (Function "a" []) 
+                        (Function "b" []), fails, "function name mismatch")
 
-e = unify' [] (Function "a" [Constant "c"]) 
-              (Function "a" [])
+        test (unify' [] (Function "a" []) 
+                        (Function "a" []), works, "function name match, no args")
 
-f = unify' [] (Function "a" [Constant "c"])
-              (Function "a" [Constant "c"])
+        test (unify' [] (Function "a" [Constant "c"]) 
+                        (Function "a" []), fails, "function name match, arity mismatch")
 
-g = unify' [] (Function "a" [Constant "c", Constant "d"]) 
-              (Function "a" [Constant "c", Constant "d"])
+        test (unify' [] (Function "a" [Constant "c"])
+                        (Function "a" [Constant "c"]), works, "function name match, args match")
 
-h = unify' [] (Function "a" [Constant "c", Constant "d"]) 
-              (Function "a" [Constant "c", Constant "e"])
+        test (unify' [] (Function "a" [Constant "c", Constant "d"]) 
+                        (Function "a" [Constant "c", Constant "d"]), works, "function name match, args match")
 
-i = unify' [] (Function "a" [Function "b" [Constant "c"]])
-              (Function "a" [Function "b" [Constant "c"]])
+        test (unify' [] (Function "a" [Constant "c", Constant "d"]) 
+                        (Function "a" [Constant "c", Constant "e"]), fails, "function args mismatch")
 
-j = unify' [] (Function "a" [Function "b" [Constant "c"]])
-              (Function "a" [Function "b" [Constant "d"]])
+        test (unify' [] (Function "a" [Function "b" [Constant "c"]])
+                        (Function "a" [Function "b" [Constant "c"]]), works, "nested functions match")
+
+        test (unify' [] (Function "a" [Function "b" [Constant "c"]])
+                        (Function "a" [Function "b" [Constant "d"]]), fails, "nested functions mismatch args")
               
-k = unify' [] (Function "a" [Function "b" [Constant "c"]])
-              (Function "a" [Function "c" [Constant "c"]])
+        test (unify' [] (Function "a" [Function "b" [Constant "c"]])
+                        (Function "a" [Function "c" [Constant "c"]]), fails, "nested functions mismatch")
 
 l = unify' [] (Variable 1) 
               (Variable 2)
