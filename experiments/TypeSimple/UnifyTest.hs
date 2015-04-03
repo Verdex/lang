@@ -78,6 +78,32 @@ main =
         test (unify [] (Variable 1)
                        (Function "a" []), contains (1, Function "a" []), "variable unifies with 0 arity function")
 
+        test (unify [] (Function "a" [Variable 1])
+                       (Function "a" [Constant "b"]), contains (1, Constant "b"), 
+                                                      "variable in function unifies with constant")
+
+        test (unify [] (Function "a" [Constant "b", Variable 1])
+                       (Function "a" [Constant "b", Constant "c"]), 
+                            contains (1, Constant "c"), 
+                            "variable in arity 2 function unifies with constant")
+
+        test (unify [] (Function "a" [Variable 1])
+                       (Function "a" [Variable 2]), 
+                                contains (1, Variable 2)
+                            <+> contains (2, Variable 1), 
+                            "variable in function unifies with variable in function")
+
+        test (unify [] (Function "a" [Variable 1])
+                       (Function "b" [Constant "c"]), fails, "function mismatch means no unification for parameters")
+
+        test (unify [] (Function "a" [Function "b" [Variable 1]])
+                       (Function "a" [Variable 2]), 
+                            contains (2, Function "b" [Variable 1]),
+                            "nested function with variable unifies with matching function with variable")
+            
+        -- TODO unify a(b(1),1) a(2, c) => 1 -> c, 2 -> b(c);  I need a collapse function to make this work the 
+        -- way I want it to
+                                                    
 
 m = unify [(1, Constant "blah")] (Variable 1) 
                                   (Variable 2)
