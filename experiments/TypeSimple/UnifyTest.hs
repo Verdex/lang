@@ -71,6 +71,10 @@ main =
         test (unify [(1, Variable 2),
                      (2, Variable 1)] (Variable 1) 
                                       (Variable 2), works, "double alias avoids infinite loop")
+        
+        test (unify [] (Variable 1) 
+                       (Constant "a"), contains (1, Constant "a"), "variable unifies with constant")
+
 
 m = unify [(1, Constant "blah")] (Variable 1) 
                                   (Variable 2)

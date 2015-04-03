@@ -3,6 +3,11 @@ module Unify where
 
 import Control.Applicative
 
+
+-- TODO the end final result might be an environment that has a bunch of indirection (1 -> 2 -> 3 -> "a")
+-- it might be nice to have a way to either clean that up during unification or afterwards (maybe 
+-- as a final step of unify)
+
 data MSResult s a = Success s a
                 | Failure 
 data MState s a = MState ( s -> MSResult s a )
