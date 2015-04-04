@@ -120,3 +120,7 @@ occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
 (?->) a t = occurs a t
 
+collapse :: Env -> Env
+collapse es = map blarg es
+    where blarg (i, Variable ti) = undefined -- blarg needs to be able to search through es
+          blarg e = e 
