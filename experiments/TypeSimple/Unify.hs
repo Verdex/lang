@@ -2,6 +2,7 @@
 module Unify where
 
 import Control.Applicative
+import Data.List
 
 
 -- TODO the end final result might be an environment that has a bunch of indirection (1 -> 2 -> 3 -> "a")
@@ -96,7 +97,10 @@ unify' a@(Variable ai) b@(Variable bi)
                     bEnv <- checkEnv bi
                     case (aEnv, bEnv) of
                         -- Both are uninitialized
-                        (Nothing, Nothing) -> do { addToEnv ai b; addToEnv bi a }
+                        -- One will point to the other, but you can't have them both
+                        -- point because this causes an infinite loop if you ever unify
+                        -- either variable against something new.
+                        (Nothing, Nothing) -> do { addToEnv ai b; }
                         -- assign A's term to B
                         (Just at, Nothing) -> do { addToEnv bi at }
                         -- assign B's term to A
@@ -120,7 +124,13 @@ occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
 (?->) a t = occurs a t
 
+-- if a loop ever happens (ie 1 -> 2 and 2 -> 1) then unification loops if anyone tries
+-- to unify against 1 or 2.  Things will break long before collapse comes along, so
+-- assume that loops dont exist.
 collapse :: Env -> Env
-collapse es = map blarg es
-    where blarg (i, Variable ti) = undefined -- blarg needs to be able to search through es
-          blarg e = e 
+collapse [] = [] 
+collapse (e : es) = e : collapse es
+-- I think the algorithm is something like:  if 1 -> Var 2 then replace all Var 1 with Var 2 and drop 1 -> Var 2
+-- the tricky part looks like foreach x . foreach y . filter all (you might need to do replacements from 
+-- earlier in the environment)
+

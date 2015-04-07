@@ -59,8 +59,7 @@ main =
                        (Function "a" [Function "c" [Constant "c"]]), fails, "nested functions mismatch")
 
         test (unify [] (Variable 1) 
-                       (Variable 2),     contains (1, Variable 2)
-                                     <+> contains (2, Variable 1), "uninitialized variable unify")
+                       (Variable 2), contains (1, Variable 2), "uninitialized variable unify")
 
         -- Self unification seems a bit odd anyway, but you self unify twice then you'll get 
         -- an infinite loop if you actually record the association in ENV
@@ -89,8 +88,7 @@ main =
 
         test (unify [] (Function "a" [Variable 1])
                        (Function "a" [Variable 2]), 
-                                contains (1, Variable 2)
-                            <+> contains (2, Variable 1), 
+                            contains (1, Variable 2),
                             "variable in function unifies with variable in function")
 
         test (unify [] (Function "a" [Variable 1])
@@ -103,7 +101,14 @@ main =
             
         -- TODO unify a(b(1),1) a(2, c) => 1 -> c, 2 -> b(c);  I need a collapse function to make this work the 
         -- way I want it to
+
+        -- TODO test what happens if 1 -> 2 and then unify 1 a (expect 1 -> a and 2 DNE ??)
+        -- how this should work exactly depends on what I do with deloop and collapse
+        -- actually this loops forever, so I need to make sure that loops never happen
+        -- in the first place
                                                     
+
+        -- TODO test 3 -> var 1, 2 -> var 3, 4 -> var 2,  1 -> var 0
 
 m = unify [(1, Constant "blah")] (Variable 1) 
                                   (Variable 2)
