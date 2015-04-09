@@ -98,32 +98,13 @@ main =
                        (Function "a" [Variable 2]), 
                             contains (2, Function "b" [Variable 1]),
                             "nested function with variable unifies with matching function with variable")
+
+        test (unify [] (Function "a" [Function "b" [Variable 1], Variable 1])
+                       (Function "a" [Variable 2, Constant "c"]),
+                            contains (1, Constant "c")
+                            <+> contains (2, Function "b" [Constant "c"]),
+                            "multiple repeat variables and indirection works")
             
-        -- TODO unify a(b(1),1) a(2, c) => 1 -> c, 2 -> b(c);  I need a collapse function to make this work the 
-        -- way I want it to
-
-        -- TODO test what happens if 1 -> 2 and then unify 1 a (expect 1 -> a and 2 DNE ??)
-        -- how this should work exactly depends on what I do with deloop and collapse
-        -- actually this loops forever, so I need to make sure that loops never happen
-        -- in the first place
-                                                    
-
-        -- TODO test 3 -> var 1, 2 -> var 3, 4 -> var 2,  1 -> var 0
-
-m = unify [(1, Constant "blah")] (Variable 1) 
-                                  (Variable 2)
-
-n = unify [(2, Constant "blah")] (Variable 1) 
-                                  (Variable 2)
-
-o = unify [(1, Function "x" [Constant "y"]), 
-            (2, Function "x" [Constant "y"])] (Variable 1) 
-                                              (Variable 2)
-
-p = unify [(1, Variable 3),
-            (2, Variable 4)] (Variable 1)
-                             (Variable 2)
-
 
 
 
@@ -135,6 +116,3 @@ u = unify [(3, Constant "a"),
             (1, Variable 3)] (Variable 1)
                              (Constant "b") -- this will need to return Nothing
 
-a = unify [(1, Variable 2),
-            (2, Variable 3)] (Variable 3)
-                             (Variable 1)

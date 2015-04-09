@@ -66,7 +66,7 @@ checkEnv i =
         return $ lookup i env
 
 unify :: Env -> Term -> Term -> Maybe Env
-unify env t1 t2 = finalMState (unify' t1 t2) env
+unify env t1 t2 = backfill <$> finalMState (unify' t1 t2) env
 
 unify' :: Term -> Term -> MState Env () 
 unify' (Constant x) (Constant y) = 
@@ -120,3 +120,13 @@ occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
 (?->) a t = occurs a t
 
+backfill :: Env -> Env
+backfill env = map blarg env
+    where blarg (i, t) = (i, ikky t)
+
+          ikky t@(Variable ti) = 
+                case lookup ti env of
+                    Nothing -> t
+                    Just t' -> t'
+          ikky t@(Constant _) = t
+          ikky (Function n ts) = (Function n (map ikky ts))
