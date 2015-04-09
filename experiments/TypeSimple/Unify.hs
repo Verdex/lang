@@ -121,12 +121,10 @@ occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 (?->) a t = occurs a t
 
 backfill :: Env -> Env
-backfill env = map blarg env
-    where blarg (i, t) = (i, ikky t)
-
-          ikky t@(Variable ti) = 
+backfill env = map (\ (i, t) -> (i, varReplace t) ) env
+    where varReplace t@(Variable ti) = 
                 case lookup ti env of
                     Nothing -> t
-                    Just t' -> t'
-          ikky t@(Constant _) = t
-          ikky (Function n ts) = (Function n (map ikky ts))
+                    Just t' -> varReplace t'
+          varReplace t@(Constant _) = t
+          varReplace (Function n ts) = (Function n (map varReplace ts))

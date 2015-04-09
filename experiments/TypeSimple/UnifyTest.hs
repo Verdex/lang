@@ -105,7 +105,12 @@ main =
                             <+> contains (2, Function "b" [Constant "c"]),
                             "multiple repeat variables and indirection works")
             
-
+        test (unify [(3, Variable 2)] (Function "a" [Function "b" [Variable 1], Variable 1])
+                                      (Function "a" [Variable 3, Constant "c"]),
+                                            contains (1, Constant "c")
+                                            <+> contains (2, Function "b" [Constant "c"])
+                                            <+> contains (3, Function "b" [Constant "c"]),
+                                            "multiple repeat variables and indirection (and more indirection) works")
 
 
 t = unify [(3, Constant "a"), 
