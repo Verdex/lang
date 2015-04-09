@@ -66,7 +66,7 @@ checkEnv i =
         return $ lookup i env
 
 unify :: Env -> Term -> Term -> Maybe Env
-unify env t1 t2 = backfill <$> finalMState (unify' t1 t2) env
+unify env t1 t2 = finalMState (unify' t1 t2) env
 
 unify' :: Term -> Term -> MState Env () 
 unify' (Constant x) (Constant y) = 
@@ -86,45 +86,34 @@ unify' (Function n1 ts1) (Function n2 ts2) =
                 unify' t1 t2
                 unifyAll ts1 ts2 
 
-unify' a@(Variable ai) b@(Variable bi) 
-    | ai == bi = success ()
-    | otherwise = do
-                    aEnv <- checkEnv ai
-                    bEnv <- checkEnv bi
-                    case (aEnv, bEnv) of
-                        -- Both are uninitialized
-                        -- One will point to the other, but you can't have them both
-                        -- point because this causes an infinite loop if you ever unify
-                        -- either variable against something new.
-                        (Nothing, Nothing) -> do { addToEnv ai b; }
-                        -- assign A's term to B
-                        (Just at, Nothing) -> do { addToEnv bi at }
-                        -- assign B's term to A
-                        (Nothing, Just bt) -> do { addToEnv ai bt }
-                        -- unify A's term with B's term
-                        (Just at, Just bt) -> if at == b || bt == a then success () else unify' at bt
-
 unify' a@(Variable ai) t
-    | a ?-> t = failure
+    -- TODO need to replace variables in 't' before doing occurs check (or let occurs have alias knowledge)
+    | a `occurs` t = failure
     | otherwise = do
                       menv <- checkEnv ai
                       case menv of
-                          Nothing -> do { addToEnv ai t }
+                          Nothing -> do { addToEnv ai t ; backfill }
                           Just t' -> unify' t t'
 
 unify' t a@(Variable _) = unify' a t
+
+unify' _ _ = failure 
 
 occurs a@(Variable _) b@(Variable _) = a == b
 occurs (Variable _) (Constant _) = False
 occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
-(?->) a t = occurs a t
 
-backfill :: Env -> Env
-backfill env = map (\ (i, t) -> (i, varReplace t) ) env
-    where varReplace t@(Variable ti) = 
+backfill :: MState Env () 
+backfill = 
+    do
+        env <- getState
+        let newEnv = map (\ (i, t) -> (i, varReplace env t) ) env in setState newEnv 
+
+
+    where varReplace env t@(Variable ti) = 
                 case lookup ti env of
                     Nothing -> t
-                    Just t' -> varReplace t'
-          varReplace t@(Constant _) = t
-          varReplace (Function n ts) = (Function n (map varReplace ts))
+                    Just t' -> varReplace env t'
+          varReplace env t@(Constant _) = t
+          varReplace env (Function n ts) = Function n $ map (varReplace env) ts

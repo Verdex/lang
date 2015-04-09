@@ -66,11 +66,6 @@ main =
         test (unify [] (Variable 1)
                        (Variable 1), freeOf (1, Variable 1), "self unification doesnt happen")
 
-        -- Warning:  This test case might fail by infinite looping
-        test (unify [(1, Variable 2),
-                     (2, Variable 1)] (Variable 1) 
-                                      (Variable 2), works, "double alias avoids infinite loop")
-        
         test (unify [] (Variable 1) 
                        (Constant "a"), contains (1, Constant "a"), "variable unifies with constant")
 
@@ -112,12 +107,22 @@ main =
                                             <+> contains (3, Function "b" [Constant "c"]),
                                             "multiple repeat variables and indirection (and more indirection) works")
 
+        test (unify [] (Constant "a") (Function "b" []), fails, "constant and function fail to unify")
 
-t = unify [(3, Constant "a"), 
-            (1, Variable 3)] (Variable 1)
-                             (Variable 2)
+        test (unify [] (Function "b" []) (Constant "a"), fails, "function and constant fail to unify")
 
-u = unify [(3, Constant "a"), 
-            (1, Variable 3)] (Variable 1)
-                             (Constant "b") -- this will need to return Nothing
+        test (unify [(3, Constant "a"), 
+                     (1, Variable 3)] (Variable 1)
+                                      (Variable 2), contains (2, Constant "a")
+                                                    <+> contains (3, Constant "a")
+                                                    <+> contains (1, Constant "a"), "indirection works")
 
+        test (unify [(3, Constant "a"), 
+                     (1, Variable 3)] (Variable 1)
+                                      (Constant "b"), fails, "indirection to mismatch fails") 
+
+
+        -- Warning:  this test can fail by falling into an infinite loop
+        test (unify [] (Variable 1) (Function "a" [Function "b" [Variable 1]]), fails, "occurs check works")
+
+        -- TODO test (unify [(2, Variable 1)] (Variable 1) (Function "a" [Variable 2]), fails, "indirect occurs check works")
