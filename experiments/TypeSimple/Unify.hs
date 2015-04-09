@@ -5,10 +5,6 @@ import Control.Applicative
 import Data.List
 
 
--- TODO the end final result might be an environment that has a bunch of indirection (1 -> 2 -> 3 -> "a")
--- it might be nice to have a way to either clean that up during unification or afterwards (maybe 
--- as a final step of unify)
-
 data MSResult s a = Success s a
                 | Failure 
 data MState s a = MState ( s -> MSResult s a )
@@ -123,14 +119,4 @@ occurs (Variable _) (Constant _) = False
 occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
 (?->) a t = occurs a t
-
--- if a loop ever happens (ie 1 -> 2 and 2 -> 1) then unification loops if anyone tries
--- to unify against 1 or 2.  Things will break long before collapse comes along, so
--- assume that loops dont exist.
-collapse :: Env -> Env
-collapse [] = [] 
-collapse (e : es) = e : collapse es
--- I think the algorithm is something like:  if 1 -> Var 2 then replace all Var 1 with Var 2 and drop 1 -> Var 2
--- the tricky part looks like foreach x . foreach y . filter all (you might need to do replacements from 
--- earlier in the environment)
 
