@@ -125,4 +125,6 @@ main =
         -- Warning:  this test can fail by falling into an infinite loop
         test (unify [] (Variable 1) (Function "a" [Function "b" [Variable 1]]), fails, "occurs check works")
 
-        -- TODO test (unify [(2, Variable 1)] (Variable 1) (Function "a" [Variable 2]), fails, "indirect occurs check works")
+        test (unify [(2, Variable 1)] (Variable 1) (Function "a" [Variable 2]), fails, "indirect occurs check works")
+
+        -- TODO might want some more complex cases (to ensure that changes to backfill et al dont cause problems)

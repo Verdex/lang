@@ -31,8 +31,8 @@ instance Monad (MState s) where
 failure :: MState s a
 failure = MState $ \ s -> Failure
 
-success :: a -> MState s a
-success = pure
+success :: MState s ()
+success = pure ()
 
 finalMState :: MState s a -> s -> Maybe s
 finalMState ms init = hr $ proj ms init
@@ -70,7 +70,7 @@ unify env t1 t2 = finalMState (unify' t1 t2) env
 
 unify' :: Term -> Term -> MState Env () 
 unify' (Constant x) (Constant y) = 
-    if x == y then success ()
+    if x == y then success
               else failure 
 
 unify' (Function n1 ts1) (Function n2 ts2) = 
@@ -86,14 +86,14 @@ unify' (Function n1 ts1) (Function n2 ts2) =
                 unify' t1 t2
                 unifyAll ts1 ts2 
 
-unify' a@(Variable ai) t
-    -- TODO need to replace variables in 't' before doing occurs check (or let occurs have alias knowledge)
-    | a `occurs` t = failure
-    | otherwise = do
-                      menv <- checkEnv ai
-                      case menv of
-                          Nothing -> do { addToEnv ai t ; backfill }
-                          Just t' -> unify' t t'
+unify' a@(Variable ai) t =
+    do
+        rt <- replaceVar t
+        occurs' a rt
+        menv <- checkEnv ai
+        case menv of
+            Nothing -> do { addToEnv ai t ; backfill } -- TODO addToEnv ai t should probably be addToEnv ai rt
+            Just t' -> unify' t t'
 
 unify' t a@(Variable _) = unify' a t
 
@@ -103,7 +103,22 @@ occurs a@(Variable _) b@(Variable _) = a == b
 occurs (Variable _) (Constant _) = False
 occurs a@(Variable _) (Function _ ts) = any (occurs a) ts
 
+occurs' :: Term -> Term -> MState Env ()
+occurs' a@(Variable _) b@(Variable _)
+    | a == b = failure
+    | otherwise = success
+occurs' (Variable _) (Constant _) = success 
+occurs' a@(Variable _) (Function _ ts) = occursAny ts
 
+    where occursAny [] = success 
+          occursAny (t:ts) = 
+            do 
+                occurs' a t
+                occursAny ts
+
+
+-- TODO here's the thing.  because I'm backfilling after every variable alias, I should be able to
+-- just backfill the one new assignment that actually changed (something for stable)
 backfill :: MState Env () 
 backfill = 
     do
@@ -111,9 +126,28 @@ backfill =
         let newEnv = map (\ (i, t) -> (i, varReplace env t) ) env in setState newEnv 
 
 
+    -- TODO this could be replaced with replaceVar after modifying backfill
     where varReplace env t@(Variable ti) = 
                 case lookup ti env of
                     Nothing -> t
                     Just t' -> varReplace env t'
           varReplace env t@(Constant _) = t
           varReplace env (Function n ts) = Function n $ map (varReplace env) ts
+
+replaceVar :: Term -> MState Env Term
+replaceVar t@(Constant _) = pure t
+replaceVar (Function n ts) = Function n <$> replaceAll ts
+
+    where replaceAll [] = pure [] 
+          replaceAll (t:ts) = 
+            do
+                t' <- replaceVar t
+                ts' <- replaceAll ts
+                return $ t' : ts'
+
+replaceVar t@(Variable ti) = 
+    do
+        mt <- checkEnv ti
+        case mt of
+            Nothing -> pure t
+            Just t' -> replaceVar t'
