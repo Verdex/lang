@@ -22,7 +22,8 @@ typeOf env expr = evalState (typeOf' env expr) 0
                 t2 <- typeOf' env e2
                 blarg $ unifyApply <$> t1 <*> t2
 
--- blarg is very interesting by itself ...
+-- blarg is very interesting by itself ... (it's kind of like a form of
+-- mu that goes through the monad)
 blarg :: Maybe (State Integer (Maybe Type)) -> State Integer (Maybe Type)
 blarg (Just m) = m
 blarg Nothing = pure Nothing
