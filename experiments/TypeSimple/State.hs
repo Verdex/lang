@@ -37,4 +37,6 @@ instance Monad (State s) where
     u >>= gen = State $ \ s -> 
         let (s', r) = proj u s in proj (gen r) s'
 
+newInteger :: State Integer Integer
+newInteger = State $ \ i -> (i + 1, i)
 

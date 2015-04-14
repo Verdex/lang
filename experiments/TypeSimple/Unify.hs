@@ -125,14 +125,14 @@ backfill =
         env <- getState
         let newEnv = map (\ (i, t) -> (i, varReplace env t) ) env in setState newEnv 
 
-
-    -- TODO this could be replaced with replaceVar after modifying backfill
-    where varReplace env t@(Variable ti) = 
-                case lookup ti env of
-                    Nothing -> t
-                    Just t' -> varReplace env t'
-          varReplace env t@(Constant _) = t
-          varReplace env (Function n ts) = Function n $ map (varReplace env) ts
+-- TODO figure out a way to avoid having both a monadic term sub and a
+-- non monadic term sub 
+varReplace env t@(Variable ti) = 
+    case lookup ti env of
+        Nothing -> t
+        Just t' -> varReplace env t'
+varReplace env t@(Constant _) = t
+varReplace env (Function n ts) = Function n $ map (varReplace env) ts
 
 replaceVar :: Term -> MState Env Term
 replaceVar t@(Constant _) = pure t
