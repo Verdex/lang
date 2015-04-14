@@ -23,6 +23,7 @@ unifyApply v@(TVar i) input =
          let mEnv = unify [] (typeToTerm v) (typeToTerm new) in
           let res = Just $ typeToTerm newOutput in
            let mEnv' = mu $ unify <$> mEnv <*> Just (typeToTerm newExpected) <*> Just (typeToTerm input) in
+            -- TODO the (\ a -> \ b -> a b) case doesn't appear to give the right type here
             return $ termToType <$> (varReplace <$> mEnv' <*> res)
         
 
