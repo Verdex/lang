@@ -3,7 +3,7 @@ module Unify where
 
 import Control.Applicative
 import Data.List
-
+import Data.Traversable
 
 data MSResult s a = Success s a
                 | Failure 
@@ -77,14 +77,9 @@ unify' (Function n1 ts1) (Function n2 ts2) =
     if n1 == n2 && (length ts1) == (length ts2)
     then 
         do 
-            unifyAll ts1 ts2
+            traverse (\ (t1, t2) -> unify' t1 t2) (zip ts1 ts2)
+            return ()
     else failure 
-
-    where unifyAll [] [] = pure ()
-          unifyAll (t1:ts1) (t2:ts2) =
-            do
-                unify' t1 t2
-                unifyAll ts1 ts2 
 
 unify' a@(Variable ai) t =
     do
@@ -125,8 +120,6 @@ backfill =
         env <- getState
         let newEnv = map (\ (i, t) -> (i, varReplace env t) ) env in setState newEnv 
 
--- TODO figure out a way to avoid having both a monadic term sub and a
--- non monadic term sub 
 varReplace env t@(Variable ti) = 
     case lookup ti env of
         Nothing -> t
@@ -136,14 +129,8 @@ varReplace env (Function n ts) = Function n $ map (varReplace env) ts
 
 replaceVar :: Term -> MState Env Term
 replaceVar t@(Constant _) = pure t
-replaceVar (Function n ts) = Function n <$> replaceAll ts
+replaceVar (Function n ts) = Function n <$> traverse replaceVar ts
 
-    where replaceAll [] = pure [] 
-          replaceAll (t:ts) = 
-            do
-                t' <- replaceVar t
-                ts' <- replaceAll ts
-                return $ t' : ts'
 
 replaceVar t@(Variable ti) = 
     do
