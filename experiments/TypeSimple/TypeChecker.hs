@@ -18,6 +18,10 @@ data Type = TSimple String
 
 
 type VarEnv = [(Integer, Term)]
+-- going to want a single environment for the monad
+-- however the typeOf probably should only expose the Type Env but not the 
+-- variable unification environment
+
 
 addToEnv :: Integer -> Term -> MState Env ()
 addToEnv i t = 
