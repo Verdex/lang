@@ -6,8 +6,10 @@ import Control.Applicative
 
 
 data MSResult s a = Success s a
-                | Failure 
+                  | Failure 
+
 data MState s a = MState ( s -> MSResult s a )
+
 proj (MState f) = f
     
 instance Functor (MState s) where
