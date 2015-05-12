@@ -1,13 +1,6 @@
 
 module State where
 
--- So this is a naive implementation of a State monad.
--- The bad news is that is sounds like the "proper" haskell
--- state monad is significantly better than this guy (fast
--- mutable data that can't escape the monad).  The good news
--- is that I understand my naive implementation right now
--- (as opposed to the cool one which I do not).  Clearly
--- my reading list needs to be expanded.
 
 import Control.Applicative
 
