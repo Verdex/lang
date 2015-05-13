@@ -2,6 +2,7 @@
 module MMT where
 
 import Control.Applicative
+import Control.Monad.Trans.Class
 
 -- This should just be a reimplementation of Maybe Monad Transformer
 
@@ -34,5 +35,5 @@ instance Monad m => Monad (MMT m) where
                             (Just v) -> proj $ g v
 
 
-
--- TODO does this need a lift?
+instance MonadTrans MMT where
+    lift m = MMT $ m >>= return . Just
