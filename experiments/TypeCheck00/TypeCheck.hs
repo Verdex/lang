@@ -11,7 +11,8 @@ type InferNum = Integer
 type Facts = [(InferNum, Maybe Type)]
 
 data Expr = EVar VarName 
-          | EAbs VarName Expr 
+          | ETypedAbs VarName Type Expr
+          | EInferAbs VarName Expr 
           | EApp Expr Expr
           deriving (Show, Eq)
 
@@ -38,12 +39,14 @@ typeof ctx e = resolve $ evalFinalState (typeof' ctx e) nullEngine
 resolve :: (InferEngine, Maybe Type) -> Maybe Type
 resolve = undefined
 
+-- unify for infer will add to the Facts which need to be resolved
+-- unify for TVar will need to overwrite things in ctx or something (add new with same name but higher in list?)
 
 typeof' :: Ctx -> Expr -> State InferEngine (Maybe Type)
 typeof' ctx (EVar n) = pure $ lookup n ctx
-typeof' ctx (EAbs n e) = 
+typeof' ctx (ETypedAbs n t e) = typeof' ( (n, t) : ctx ) e
+typeof' ctx (EInferAbs n e) = 
     do
         infer <- fmap TInfer newInfer
         typeof' ( (n, infer) : ctx ) e
-
 
