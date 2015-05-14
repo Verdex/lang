@@ -14,6 +14,9 @@ evalState u s = let (_, r) = proj u s in r
 finalState :: State s a -> s -> s
 finalState u s = let (final, _) = proj u s in final
 
+evalFinalState :: State s a -> s -> (s, a)
+evalFinalState u s = let (final, r) = proj u s in (final, r)
+
 getState :: State s s
 getState = State $ \ s -> (s, s)
 
