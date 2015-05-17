@@ -65,26 +65,4 @@ freeVarShift' t =
 failure :: State a (Maybe b)
 failure = pure Nothing
 
-typeof :: Ctx -> Expr -> Maybe Type
-typeof ctx e = resolve $ evalFinalState (typeof' ctx e) nullEngine
 
-resolve :: (InferEngine, Maybe Type) -> Maybe Type
-resolve = undefined
-
--- unify for infer will add to the Facts which need to be resolved
--- unify for TVar will need to overwrite things in ctx or something (add new with same name but higher in list?)
-
--- unify for TVar seems like its going to effect all other TVars with the same name, but only locally
--- to make things more complicated I think that it should probably effect Infers that point to matching
--- TVars (but again only "locally")
-
--- it might be best to get ETypedAbs working first
-
-typeof' :: Ctx -> Expr -> State InferEngine (Maybe Type)
-typeof' ctx (EVar n) = pure $ lookup n ctx
-typeof' ctx (EAbs n t e) = typeof' ( (n, t) : ctx ) e
-{-typeof' ctx (EInferAbs n e) = 
-    do
-        infer <- fmap TInfer newInfer
-        typeof' ( (n, infer) : ctx ) e
--}
