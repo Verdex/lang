@@ -16,15 +16,13 @@ data Expr = EVar VarName
           deriving (Show, Eq)
 
 data Type = TVar String
+          | TVar' Integer
           | TSimple String
           | TArrow Type Type
           deriving (Show, Eq)
 
-data Type' = TVar' Integer
-           | TSimple' String
-           | TArrow' Type' Type'
-           deriving (Show, Eq)
 
+-- TODO not sure what to call this type right now
 type N = (Integer, [(String, Integer)])
 
 newInt :: State N Integer
@@ -46,27 +44,23 @@ lookupLink n =
         (_, ctx) <- getState
         return $ lookup n ctx
 
-blah :: Type -> State N Type'
-blah (TArrow t1 t2) = TArrow' <$> blah t1 <*> blah t2
-blah (TSimple s) = pure $ TSimple' s
-blah (TVar s) =  
+freeVarShift :: Integer -> Type -> (Integer, Type)
+freeVarShift i t = evalState (freeVarShift' t) (i, [])
+freeVarShift' :: Type -> State N (Integer, Type)
+freeVarShift' (TVar s) = 
     do
-        mn <- lookupLink s
-        case mn of
+        maybe_int <- lookupLink s
+        case maybe_int of
             Nothing -> do
-                            i <- newInt
-                            setLink s i
-                            return (TVar' i)
-            Just i -> return (TVar' i)
+                            int <- newInt
+                            setLink s int
+                            return (int, (TVar' int))
+            Just int -> return (int, (TVar' int))
+freeVarShift' t =
+    do
+        int <- newInt
+        return (int, t)
 
-
-type InferEngine = (InferNum, Facts)
-
-nullEngine :: InferEngine
-nullEngine = (0, [])
-
-newInfer :: State InferEngine InferNum 
-newInfer = State $ \ (inferNum, facts) -> ( (inferNum + 1, facts), inferNum )
 
 failure :: State a (Maybe b)
 failure = pure Nothing
