@@ -11,16 +11,54 @@ type InferNum = Integer
 type Facts = [(InferNum, Maybe Type)]
 
 data Expr = EVar VarName 
-          | ETypedAbs VarName Type Expr
-          | EInferAbs VarName Expr 
+          | EAbs VarName Type Expr
           | EApp Expr Expr
           deriving (Show, Eq)
 
 data Type = TVar String
           | TSimple String
           | TArrow Type Type
-          | TInfer InferNum 
           deriving (Show, Eq)
+
+data Type' = TVar' Integer
+           | TSimple' String
+           | TArrow' Type' Type'
+           deriving (Show, Eq)
+
+type N = (Integer, [(String, Integer)])
+
+newInt :: State N Integer
+newInt = 
+    do
+        (s, ctx) <- getState
+        setState (s + 1, ctx)
+        return s
+
+setLink :: String -> Integer -> State N ()
+setLink n i = 
+    do
+        (s, ctx) <- getState
+        setState $ (s, (n, i) : ctx)
+
+lookupLink :: String -> State N (Maybe Integer)
+lookupLink n = 
+    do
+        (_, ctx) <- getState
+        return $ lookup n ctx
+
+blah :: Type -> State N Type'
+blah (TArrow t1 t2) = TArrow' <$> blah t1 <*> blah t2
+blah (TSimple s) = pure $ TSimple' s
+blah (TVar s) =  
+    do
+        mn <- lookupLink s
+        case mn of
+            Nothing -> do
+                            i <- newInt
+                            setLink s i
+                            return (TVar' i)
+            Just i -> return (TVar' i)
+
 
 type InferEngine = (InferNum, Facts)
 
@@ -50,9 +88,9 @@ resolve = undefined
 
 typeof' :: Ctx -> Expr -> State InferEngine (Maybe Type)
 typeof' ctx (EVar n) = pure $ lookup n ctx
-typeof' ctx (ETypedAbs n t e) = typeof' ( (n, t) : ctx ) e
-typeof' ctx (EInferAbs n e) = 
+typeof' ctx (EAbs n t e) = typeof' ( (n, t) : ctx ) e
+{-typeof' ctx (EInferAbs n e) = 
     do
         infer <- fmap TInfer newInfer
         typeof' ( (n, infer) : ctx ) e
-
+-}
