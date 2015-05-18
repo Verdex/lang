@@ -22,23 +22,22 @@ data Type = TVar String
           deriving (Show, Eq)
 
 
--- TODO not sure what to call this type right now
-type N = (Integer, [(String, Integer)])
+type UB = (Integer, [(String, Integer)])
 
-newInt :: State N Integer
+newInt :: State UB Integer
 newInt = 
     do
         (s, ctx) <- getState
         setState (s + 1, ctx)
         return s
 
-setLink :: String -> Integer -> State N ()
+setLink :: String -> Integer -> State UB ()
 setLink n i = 
     do
         (s, ctx) <- getState
         setState $ (s, (n, i) : ctx)
 
-lookupLink :: String -> State N (Maybe Integer)
+lookupLink :: String -> State UB (Maybe Integer)
 lookupLink n = 
     do
         (_, ctx) <- getState
@@ -52,7 +51,7 @@ freeVarShift t =
         setState final
         return t
 
-freeVarShift' :: Type -> State N Type
+freeVarShift' :: Type -> State UB Type
 freeVarShift' (TVar s) = 
     do
         maybe_int <- lookupLink s
