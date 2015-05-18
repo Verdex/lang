@@ -64,10 +64,13 @@ failure :: State a (Maybe b)
 failure = pure Nothing
 
 
-typeof :: Ctx -> Ctx -> Expr -> (Maybe Type)
-typeof freeVars boundVars e = evalState (typeof' freeVars boundVars e) 0
+typeof :: Ctx -> Expr -> (Maybe Type)
+typeof free e = evalState (typeof' free [] e) 0 
 
 typeof' :: Ctx -> Ctx -> Expr -> State Integer (Maybe Type)
-typeof' freeVars boundVars (EVar s) =  (<|>) <$> (pure $ lookup s boundVars) <*> (ikky $ freeVarShift <$> lookup s freeVars)
+typeof' free bound (EVar s) =  (<|>) <$> (pure $ lookup s bound) <*> (ikky $ freeVarShift <$> lookup s free)
     where ikky Nothing = pure Nothing
           ikky (Just s) = fmap Just s
+
+typeof' free bound (EAbs n t e) = typeof' free ( (n, t) : bound ) e
+
