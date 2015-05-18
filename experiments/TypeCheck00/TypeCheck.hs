@@ -44,9 +44,15 @@ lookupLink n =
         (_, ctx) <- getState
         return $ lookup n ctx
 
-freeVarShift :: Integer -> Type -> (Integer, Type)
-freeVarShift i t = evalState (freeVarShift' t) (i, [])
-freeVarShift' :: Type -> State N (Integer, Type)
+freeVarShift :: Type -> State Integer Type
+freeVarShift t = 
+    do
+        init <- getState 
+        ((final, _), t) <- pure $ evalFinalState (freeVarShift' t) (init, [])
+        setState final
+        return t
+
+freeVarShift' :: Type -> State N Type
 freeVarShift' (TVar s) = 
     do
         maybe_int <- lookupLink s
@@ -54,12 +60,12 @@ freeVarShift' (TVar s) =
             Nothing -> do
                             int <- newInt
                             setLink s int
-                            return (int, (TVar' int))
-            Just int -> return (int, (TVar' int))
+                            return (TVar' int)
+            Just int -> return (TVar' int)
 freeVarShift' t =
     do
         int <- newInt
-        return (int, t)
+        return t
 
 
 failure :: State a (Maybe b)
