@@ -7,8 +7,6 @@ import State
 type VarName = String
 type Ctx = [(VarName, Type)]
 
-type InferNum = Integer
-type Facts = [(InferNum, Maybe Type)]
 
 data Expr = EVar VarName 
           | EAbs VarName Type Expr
@@ -20,7 +18,6 @@ data Type = TVar String
           | TSimple String
           | TArrow Type Type
           deriving (Show, Eq)
-
 
 type UB = (Integer, [(String, Integer)])
 
@@ -61,13 +58,16 @@ freeVarShift' (TVar s) =
                             setLink s int
                             return (TVar' int)
             Just int -> return (TVar' int)
-freeVarShift' t =
-    do
-        int <- newInt
-        return t
-
+freeVarShift' t = pure t
 
 failure :: State a (Maybe b)
 failure = pure Nothing
 
 
+typeof :: Ctx -> Ctx -> Expr -> (Maybe Type)
+typeof freeVars boundVars e = evalState (typeof' freeVars boundVars e) 0
+
+typeof' :: Ctx -> Ctx -> Expr -> State Integer (Maybe Type)
+typeof' freeVars boundVars (EVar s) =  (<|>) <$> (pure $ lookup s boundVars) <*> (ikky $ freeVarShift <$> lookup s freeVars)
+    where ikky Nothing = pure Nothing
+          ikky (Just s) = fmap Just s
