@@ -3,10 +3,10 @@ module TypeCheck where
 
 import Control.Applicative
 import State
+import UniqueBinding
 
 type VarName = String
 type Ctx = [(VarName, Type)]
-
 
 data Expr = EVar VarName 
           | EAbs VarName Type Expr
@@ -19,36 +19,18 @@ data Type = TVar String
           | TArrow Type Type
           deriving (Show, Eq)
 
-type UB = (Integer, [(String, Integer)])
+failure :: State a (Maybe b)
+failure = pure Nothing
 
-newInt :: State UB Integer
-newInt = 
-    do
-        (s, ctx) <- getState
-        setState (s + 1, ctx)
-        return s
-
-setLink :: String -> Integer -> State UB ()
-setLink n i = 
-    do
-        (s, ctx) <- getState
-        setState $ (s, (n, i) : ctx)
-
-lookupLink :: String -> State UB (Maybe Integer)
-lookupLink n = 
-    do
-        (_, ctx) <- getState
-        return $ lookup n ctx
-
-freeVarShift :: Type -> State Integer Type
+freeVarShift :: Type -> State (UB Integer Type) Type
 freeVarShift t = 
     do
-        init <- getState 
+        (init, ctx) <- getState 
         ((final, _), t) <- pure $ evalFinalState (freeVarShift' t) (init, [])
-        setState final
+        setState (final, ctx)
         return t
 
-freeVarShift' :: Type -> State UB Type
+freeVarShift' :: Type -> State (UB String Integer) Type
 freeVarShift' (TVar s) = 
     do
         maybe_int <- lookupLink s
@@ -66,14 +48,10 @@ freeVarShift' (TArrow t1 t2) =
         t2' <- freeVarShift' t2
         return $ TArrow t1' t2'
 
-failure :: State a (Maybe b)
-failure = pure Nothing
-
-
 typeof :: Ctx -> Expr -> (Maybe Type)
-typeof free e = evalState (typeof' free [] e) 0 
+typeof free e = evalState (typeof' free [] e) nullBinding 
 
-typeof' :: Ctx -> Ctx -> Expr -> State Integer (Maybe Type)
+typeof' :: Ctx -> Ctx -> Expr -> State (UB Integer Type) (Maybe Type)
 typeof' free bound (EVar s) =  (<|>) <$> (pure $ lookup s bound) <*> (ikky $ freeVarShift <$> lookup s free)
     where ikky Nothing = pure Nothing
           ikky (Just s) = fmap Just s
