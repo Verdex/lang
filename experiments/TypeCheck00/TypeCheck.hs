@@ -86,3 +86,23 @@ typeofApp (Just t1@(TVar' _)) (Just t2) =
 unify :: Type -> Type -> State (UB Integer Type) (Maybe Type)
 unify t@(TSimple a) (TSimple b) = if a == b then pure $ Just t else failure
 unify t@(TVar a) (TVar b) = if a == b then pure $ Just t else failure
+unify t@(TArrow t11 t12) (TArrow t21 t22) = 
+    do
+        r1 <- unify t11 t21
+        case r1 of
+            Nothing -> failure
+            (Just _) -> do
+                            r2 <- unify t12 t22
+                            case r2 of
+                                Nothing -> failure
+                                (Just _) -> return $ Just t
+unify t1@(TVar' i1) t2 =  -- TODO occurs check?
+    do
+        maybe_l1 <- lookupLink i1
+        case maybe_l1 of
+            Nothing -> unify t1 t2
+            Just t -> unify t2 t
+
+unify _ _ = failure
+       
+
