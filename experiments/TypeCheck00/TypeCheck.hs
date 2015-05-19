@@ -62,13 +62,27 @@ typeof' free bound (EApp e1 e2) =
     do
         maybe_t1 <- typeof' free bound e1
         maybe_t2 <- typeof' free bound e2
-        case maybe_t1 of
+        typeofApp maybe_t1 maybe_t2
+
+typeofApp :: Maybe Type -> Maybe Type -> State (UB Integer Type) (Maybe Type)
+typeofApp Nothing _ = failure
+typeofApp _ Nothing = failure
+typeofApp (Just (TSimple _)) _ = failure
+typeofApp (Just (TVar _)) _ = failure
+typeofApp (Just (TArrow t11 t12)) (Just t2) = 
+    do
+        r <- unify t11 t2
+        case r of
             Nothing -> failure
-            Just (TSimple _) -> failure
-            Just (TVar _) -> failure
-            Just (TArrow t11 t12) -> failure
+            (Just _) -> return $ Just t12 
+typeofApp (Just t1@(TVar' _)) (Just t2) = 
+    do
+        newTVar' <- fmap TVar' newInt
+        r <- unify t1 (TArrow t2 newTVar')
+        case r of
+            Nothing -> failure
+            (Just _) -> return $ Just newTVar' 
 
-
-
-unify :: Type -> Type -> Maybe Type
-unify o@(TSimple a) (TSimple b) = if a == b then Just o else Nothing
+unify :: Type -> Type -> State (UB Integer Type) (Maybe Type)
+unify t@(TSimple a) (TSimple b) = if a == b then pure $ Just t else failure
+unify t@(TVar a) (TVar b) = if a == b then pure $ Just t else failure
