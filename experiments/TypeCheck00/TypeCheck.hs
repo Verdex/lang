@@ -58,7 +58,13 @@ freeVarShift' (TVar s) =
                             setLink s int
                             return (TVar' int)
             Just int -> return (TVar' int)
-freeVarShift' t = pure t
+freeVarShift' t@(TSimple _) = pure t
+freeVarShift' t@(TVar' _) = pure t
+freeVarShift' (TArrow t1 t2) = 
+    do
+        t1' <- freeVarShift' t1
+        t2' <- freeVarShift' t2
+        return $ TArrow t1' t2'
 
 failure :: State a (Maybe b)
 failure = pure Nothing
@@ -74,3 +80,17 @@ typeof' free bound (EVar s) =  (<|>) <$> (pure $ lookup s bound) <*> (ikky $ fre
 
 typeof' free bound (EAbs n t e) = typeof' free ( (n, t) : bound ) e
 
+typeof' free bound (EApp e1 e2) = 
+    do
+        maybe_t1 <- typeof' free bound e1
+        maybe_t2 <- typeof' free bound e2
+        case maybe_t1 of
+            Nothing -> failure
+            Just (TSimple _) -> failure
+            Just (TVar _) -> failure
+            Just (TArrow t11 t12) -> failure
+
+
+
+unify :: Type -> Type -> Maybe Type
+unify o@(TSimple a) (TSimple b) = if a == b then Just o else Nothing
