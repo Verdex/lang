@@ -1,8 +1,51 @@
 
+(* 
+
+any arrow with type variables in it that gets applied to a variable needs
+a type level beta reduction thingy to occur on it
+
+type variables that come from bound  variables can remain like they are because we need
+to match everything in the type sig up with the final type we arrive at (and the 
+sig has those same type variables in it)
+
+type variables that come from free variables need the alpha conversion treatment
+done on them (every example i've seen does the debruijn index thing so they dont
+have to worry about alpha conversion, but i really dont get why that works with 
+free varaibles) ... anyway, to avoid the debruijn thing I can probably just
+make a gensym and then apply that to any free variable's type variables
+
+an internal let seems odd b/c if it doesn't capture any lexical values
+it seems like it should be treated as free, but if it does capture
+lexical values then those values should be treated as bound ...
+
+I guess the same question comes up with a lambda ... when does the type variables
+in a locally defined lambda be considered the same as the type varaibles
+that show up in the function's sig and when should they be just considered independent?
+
+this is an interesting question b/c let x (y : a) (z : a) = ... might be different
+than let x (y : a) = \ z : a -> ... depending on how i answer
+
+let x (blah : a -> b -> a) : ? = 
+    blah id
+
+    This instance the type of (blah id) has a mix of type varaibles where some of them
+    need to be replaced and some of them do not
+
+let x (blah : a -> b -> a -> b) : ? =
+    blah id 5
+
+    if you're going to feed some result of blah into a function that takes
+    an int then you want to replace 'b' but if you have some other parameter
+    'b' that you take into 'x' and maybe 'x' returns a 'b' then you don't 
+    want to replace 'b'
+
+*)
+
+
 type 'a option = Some of 'a
                | None
 
-type var = Free | Bound
+type var = Free | Bound 
 
 type t = TVar   of string 
        | TConst of string
