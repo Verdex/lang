@@ -26,6 +26,17 @@ let rec typeof (ctx : ctx) (expr : expr) : t option =
         (match b_type with
          None -> None
          | Some t -> Some (TArrow(p_type, t)))
+
+(*
+if e1 contains type variables and its bound then we can handle it the
+same way as if it contained const types
+
+alternatively if e1 contains type varaibles and its free then we need to
+basically do a beta reduction on the types
+*)
+
+
+
     | EApp (e1, e2) ->
         let ot1 = typeof ctx e1 in
         let ot2 = typeof ctx e2 in 
