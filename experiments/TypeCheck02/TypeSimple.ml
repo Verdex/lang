@@ -2,6 +2,8 @@
 type 'a option = Some of 'a
                | None
 
+type var = Free | Bound
+
 type t = TConst of string
        | TArrow of t * t
 
@@ -9,18 +11,18 @@ type expr = EVar of string
           | EAbs of string * t * expr
           | EApp of expr * expr
 
-type ctx = (string * t) list 
+type ctx = (string * t * var) list 
 
 let my_find (func : string -> bool) (ctx : ctx) : t option =
-    let projT (s, t) = t in
-    try Some (projT (List.find (fun (s, t) -> func s) ctx))
+    let projT (s, t, v) = t in
+    try Some (projT (List.find (fun (s, t, v) -> func s) ctx))
     with _ -> None
 
 let rec typeof (ctx : ctx) (expr : expr) : t option =
     match expr with
     EVar name -> my_find (fun n -> n = name) ctx
     | EAbs (param, p_type, body) -> 
-        let b_type = typeof ((param,p_type) :: ctx) body in
+        let b_type = typeof ((param,p_type,Bound) :: ctx) body in
         (match b_type with
          None -> None
          | Some t -> Some (TArrow(p_type, t)))
