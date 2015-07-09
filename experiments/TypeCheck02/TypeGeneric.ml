@@ -4,7 +4,8 @@ type 'a option = Some of 'a
 
 type var = Free | Bound
 
-type t = TConst of string
+type t = TVar   of string 
+       | TConst of string
        | TArrow of t * t
 
 type expr = EVar of string
@@ -17,6 +18,13 @@ let my_find (func : string -> bool) (ctx : ctx) : t option =
     let projT (s, t, v) = t in
     try Some (projT (List.find (fun (s, t, v) -> func s) ctx))
     with _ -> None
+
+let rec t_beta (target : t) (varToReplace : string) (replaceWith : t) : t =
+    match target with
+        TVar n when n = varToReplace -> replaceWith
+        | TVar n -> TVar n
+        | TConst n -> TConst n
+        | TArrow( t1,  t2 ) -> TArrow (t_beta t1 varToReplace replaceWith, t_beta t2 varToReplace replaceWith)
 
 let rec typeof (ctx : ctx) (expr : expr) : t option =
     match expr with
